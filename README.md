@@ -1,0 +1,2 @@
+# DB_Template
+This is a template repository. It is used to create new repositories for Discord bots. Please make sure that when you copy, **you add config.json to your .gitignore**. Otherwise, you may accidentally commit sensitive data!

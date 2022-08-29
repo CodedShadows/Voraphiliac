@@ -1,0 +1,17 @@
+{
+  "bot": {
+    "applicationId": "",
+    "guildId": "",
+    "token": ""
+  },
+  "discord": {
+    "logChannel": "",
+    "suppressChannel": ""
+  },
+  "mysql": {
+    "host": "",
+    "user": "",
+    "password": "",
+    "database": ""
+  }
+}

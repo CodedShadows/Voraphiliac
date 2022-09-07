@@ -1,12 +1,13 @@
-const { Client, Collection } = require("discord.js");
+const { Client, Collection, IntentsBitField, Partials } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Sequelize } = require("sequelize");
-const { Routes } = require("discord-api-types/v10");
+const { Routes, InteractionType } = require("discord-api-types/v10");
 const { interactionEmbed, toConsole } = require("./functions.js");
 const config = require("./config.json");
 const rest = new REST({ version: 10 }).setToken(config.bot.token);
 const fs = require("node:fs");
 const wait = require("node:util").promisify(setTimeout);
+const warnedGuilds = [];
 let ready = false;
 
 //#region Setup
@@ -35,33 +36,55 @@ if(!fs.existsSync("./models")) {
 
 // Discord bot
 const client = new Client({
-  intents: ["GUILDS","GUILD_BANS","GUILD_MEMBERS"]
+  intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMembers],
+  partials: [Partials.GuildMember]
 });
 const slashCommands = [];
 client.commands = new Collection();
+client.modals = new Collection();
 client.sequelize = sequelize;
 client.models = sequelize.models;
 
 (async () => {
   if(!fs.existsSync("./commands")) return console.info("[FILE-LOAD] No 'commands' folder found, skipping command loading");
   const commands = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
-  console.info(`[FILE-LOAD] Loading files, expecting ${commands.length} files`);
+  console.info(`[CMD-LOAD] Loading commands, expecting ${commands.length} files`);
 
   for(let file of commands) {
     try {
-      console.info(`[FILE-LOAD] Loading file ${file}`);
+      console.info(`[CMD-LOAD] Loading file ${file}`);
       let command = require(`./commands/${file}`);
 
       if(command.name) {
-        console.info(`[FILE-LOAD] Loaded: ${file}`);
+        console.info(`[CMD-LOAD] Loaded: ${file}`);
         slashCommands.push(command.data.toJSON());
         client.commands.set(command.name, command);
       }
     } catch(e) {
-      console.warn(`[FILE-LOAD] Unloaded: ${file}`);
-      console.warn(`[FILE-LOAD] ${e}`);
+      console.warn(`[CMD-LOAD] Unloaded: ${file}`);
+      console.warn(`[CMD-LOAD] ${e}`);
     }
   }
+  console.info("[CMD-LOAD] Loaded commands");
+
+  if(!fs.existsSync("./modals")) await fs.mkdirSync("./modals");
+  const modals = fs.readdirSync("./modals").filter(file => file.endsWith(".js"));
+  console.info(`[MDL-LOAD] Loading modals, expecting ${modals.length} modals`);
+  for(let file of modals) {
+    try {
+      console.info(`[MDL-LOAD] Loading file ${file}`);
+      let modal = require(`./modals/${file}`);
+
+      if(modal.name) {
+        console.info(`[MDL-LOAD] Loaded: ${file}`);
+        client.modals.set(modal.name, modal);
+      }
+    } catch(e) {
+      console.warn(`[MDL-LOAD] Unloaded: ${file}`);
+      console.warn(`[MDL-LOAD] ${e}`);
+    }
+  }
+  console.info("[MDL-LOAD] Loaded modals");
 
   console.info("[FILE-LOAD] All files loaded into ASCII and ready to be sent");
   await wait(500); // Artificial wait to prevent instant sending
@@ -72,6 +95,7 @@ client.models = sequelize.models;
 
     // Refresh based on environment
     if(process.env.environment === "development") {
+      console.warn("[APP-CMD] Development environment detected, refreshing application commands");
       await rest.put(
         Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId),
         { body: slashCommands }
@@ -98,7 +122,7 @@ client.models = sequelize.models;
 client.on("ready", async () => {
   console.info("[READY] Client is ready");
   console.info(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at ${new Date()}`);
-  toConsole(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at <t:${Math.floor(Date.now()/1000)}:T>. Client ${ready ? "can" : "**cannot**"} receive commands!`, "client.on(ready)", client);
+  toConsole(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at <t:${Math.floor(Date.now()/1000)}:T>. Client ${ready ? "can" : "**cannot**"} receive commands!`, new Error().stack, client);
   // Set the status to new Date();
   client.guilds.cache.each(g => g.members.fetch());
   client.user.setActivity(`${client.users.cache.size} users across ${client.guilds.cache.size} servers`, { type: "LISTENING" });
@@ -121,26 +145,47 @@ client.on("ready", async () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if(!interaction.inGuild()) return interactionEmbed(4, "[WARN-NODM]", "", interaction, client, [true, 10]);
   if(!ready) return interactionEmbed(4, "", "The bot is starting up, please wait", interaction, client, [true, 10]);
+  if(!interaction.inGuild()) return interactionEmbed(2, "[WARN-NODM]", "", interaction, client, [true, 10]);
   
-  if(interaction.isCommand()) {
+  if(interaction.type === InteractionType.ApplicationCommand) {
+    if(!warnedGuilds.includes(interaction.guild.id) && !interaction.channel.permissionsFor(interaction.guild.roles.everyone).has("UseExternalEmojis")) {
+      warnedGuilds.push(interaction.guild.id);
+      return interaction.reply({ content: "**Heads Up**\n> This bot uses external emojis and has detected that the `@everyone` role cannot use external emojis in this channel. In order for these to work properly, you must allow the `@everyone` role to use external emojis in this channel (Or across the entire server, which is a better solution). If you do not do this, some emojis may look weird when sent by the bot\n> \n> *This is a one-time message that is sent whenever the bot restarts. Re run your command and it'll work normally*" });
+    }
     let command = client.commands.get(interaction.commandName);
-    await interaction.deferReply({ ephemeral: false });
     if(command) {
-      command.run(client, interaction, interaction.options)
+      const ack = command.run(client, interaction, interaction.options)
         .catch((e) => {
-          interaction.editReply("Something went wrong while executing the command. Please report this to the developer");
-          toConsole(e.stack, `command.run(${command.name})`, client);
+          interaction.editReply({ content: "Something went wrong while executing the command. Please report this to a developer", components: [] });
+          return toConsole(e.stack, new Error().stack, client);
+        });
+      
+      await wait(1e4);
+      if(ack != null) return; // Already executed
+      interaction.fetchReply()
+        .then(m => {
+          if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "The command timed out and failed to reply in 10 seconds", interaction, client, [true, 15]);
         });
     }
-    await wait(1e4);
-    interaction.fetchReply()
-      .then(m => {
-        if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "The command timed out and failed to reply in 10 seconds", interaction, client, [true, 15]);
-      });
-  } else {
-    interaction.deferReply();
+  } if(interaction.type === InteractionType.ModalSubmit) {
+    let modal = client.modals.get(interaction.customId);
+    if(modal) {
+      const ack = modal.run(client, interaction, interaction.fields)
+        .catch((e) => {
+          interaction.editReply({ content: "Something went wrong while executing the modal. Please report this to a developer", components: [] });
+          return toConsole(e.stack, new Error().stack, client);
+        });
+
+      await wait(1e4);
+      if(ack != null) return; // Already executed
+      interaction.fetchReply()
+        .then(m => {
+          if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "The modal timed out and failed to reply in 10 seconds", interaction, client, [true, 15]);
+        });
+    }
+  } else if(interaction.type === InteractionType.MessageComponent) {
+    return;
   }
 });
 //#endregion
@@ -154,7 +199,7 @@ process.on("uncaughtException", (err, origin) => {
     console.error(err, origin);
     return process.exit(14);
   }
-  toConsole(`An [uncaughtException] has occurred.\n\n> ${err}\n> ${origin}`, "process.on('uncaughtException')", client);
+  toConsole(`An [uncaughtException] has occurred.\n\n> ${err}\n> ${origin}`, new Error().stack, client);
 });
 process.on("unhandledRejection", async (promise) => {
   if(!ready) {
@@ -162,17 +207,18 @@ process.on("unhandledRejection", async (promise) => {
     console.error(promise);
     return process.exit(15);
   }
+  if(process.env.environment === "development") return console.log(promise);
   const suppressChannel = await client.channels.fetch(config.discord.suppressChannel).catch(() => { return undefined; });
   if(!suppressChannel) return console.error(`An [unhandledRejection] has occurred.\n\n> ${promise}`);
   if(String(promise).includes("Interaction has already been acknowledged.") || String(promise).includes("Unknown interaction") || String(promise).includes("Unknown Message")) return suppressChannel.send(`A suppressed error has occured at process.on(unhandledRejection):\n>>> ${promise}`);
-  toConsole(`An [unhandledRejection] has occurred.\n\n> ${promise}`, "process.on('unhandledRejection')", client);
+  toConsole(`An [unhandledRejection] has occurred.\n\n> ${promise}`, new Error().stack, client);
 });
 process.on("warning", async (warning) => {
   if(!ready) {
     console.warn("[warning] has occurred during start up");
     console.warn(warning);
   }
-  toConsole(`A [warning] has occurred.\n\n> ${warning}`, "process.on('warning')", client);
+  toConsole(`A [warning] has occurred.\n\n> ${warning}`, new Error().stack, client);
 });
 process.on("exit", (code) => {
   console.error("[EXIT] The process is exiting!");

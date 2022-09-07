@@ -13,7 +13,7 @@ module.exports = {
    */
   run: async (client, interaction, fields) => {
     const filter = (i) => i.user.id === interaction.user.id;
-    const message = await interaction.reply({ content: "Click the button to continue", components: [new ActionRowBuilder().setComponents(new ButtonBuilder({ custom_id: "continue", label: "Continue", style: ButtonStyle.Success }))], ephemeral: true, fetchReply: true });
+    const message = await interaction.reply({ content: "Click the button to continue (Note: If the modal fails, pleases re-run the command)", components: [new ActionRowBuilder().setComponents(new ButtonBuilder({ custom_id: "continue", label: "Continue", style: ButtonStyle.Success }))], ephemeral: true, fetchReply: true });
     const confirm = await message
       .createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 30_000 });
 

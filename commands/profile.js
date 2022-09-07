@@ -189,6 +189,7 @@ module.exports = {
         const url = await option.awaitModalSubmit({ filter, time: 30_000 })
           .catch(() => { return undefined; });
 
+        if(!url) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         await url.reply({ content: `${emojis.failure} | Please close this message and pay attention to the above one!`, ephemeral: true });
         await interaction.editReply({ content: `${emojis.warning} | Processing...`, components: [] });
         if(!option) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });

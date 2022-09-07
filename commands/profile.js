@@ -193,7 +193,7 @@ module.exports = {
         await interaction.editReply({ content: `${emojis.warning} | Processing...`, components: [] });
         if(!option) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         const image = url.fields.fields.first();
-        const regex = /^https:\/\/.+\.[a-zA-Z0-9]{0,3}(\/.+){0,}[a-zA-Z0-9]\.(png|jpg)$/i;
+        const regex = /^https:\/\/.+\.[a-zA-Z0-9]+(\/.+)+[a-zA-Z0-9]\.(png|jpg)$/i;
         const character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
         if(!regex.test(image.value)) return interaction.editReply({ content: `${emojis.failure} | You must enter a URL that starts with https and ends with .png or .jpg` });
 

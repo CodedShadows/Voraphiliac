@@ -53,7 +53,8 @@ module.exports = {
    */
   run: async (client, interaction, options) => {
     await interaction.deferReply();
-    const type = options.getString("type").split(" ")[0].toLowerCase() || "oral";
+    let type = options.getString("type") || "oral";
+    type = type.split(" ")[0].toLowerCase();
     const target = options.getMember("target");
     if(!target) return interaction.editReply({ content: `${emojis.failure} | Your target doesn't exist on this server`});
 

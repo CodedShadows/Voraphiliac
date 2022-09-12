@@ -276,7 +276,7 @@ module.exports = {
       }
       let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status));
       if(currentPred.length > 0)
-        currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
+        currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } }).name;
       else
         currentPred = "Nobody yet!";
       const embeds = [
@@ -343,7 +343,7 @@ module.exports = {
           fields: [
             {
               name: "Spending some time inside of...",
-              value: `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>`,
+              value: `${currentPred.name ? `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>` : currentPred}`,
               inline: true
             },
             {

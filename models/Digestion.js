@@ -10,8 +10,12 @@ module.exports.import = (sequelize) => sequelize.define("Digestion", {
     type: DataTypes.TEXT("tiny"),
     allowNull: false,
     validation: {
-      is: /(Voring)|(Vored)|(Digesting)|(Digested)|(Dead)/
+      is: /(Voring)|(Vored)|(Digesting)|(Digested)|(Free)/
     }
+  },
+  type: {
+    type: DataTypes.TEXT("tiny"),
+    allowNull: false,
   },
   predator: {
     type: DataTypes.INTEGER,
@@ -27,7 +31,8 @@ module.exports.import = (sequelize) => sequelize.define("Digestion", {
     allowNull: false,
     references: {
       model: "Characters",
-      key: "cId"
+      key: "cId",
+      onDelete: "CASCADE"
     }
   }
 });

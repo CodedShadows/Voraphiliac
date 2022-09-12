@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, ModalSubmitInteraction, ModalSubmitFields, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require("discord.js");
-const { emojis } = require("../config.json");
+const { emojis } = require("../configs/config.json");
 const { Op } = require("sequelize");
-const { new_profile_2 } = require("../modals.js");
+const { new_profile_2 } = require("../configs/modals.js");
 
 module.exports = {
   name: "new_profile_1",

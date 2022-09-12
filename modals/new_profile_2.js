@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, ModalSubmitInteraction, ModalSubmitFields } = require("discord.js");
-const { emojis } = require("../config.json");
+const { emojis } = require("../configs/config.json");
 
 module.exports = {
   name: "new_profile_2",

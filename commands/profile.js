@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 const { SlashCommandBuilder, Client, CommandInteraction, CommandInteractionOptionResolver, ComponentType, ModalBuilder, ActionRowBuilder, SelectMenuBuilder, SelectMenuOptionBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, parseEmoji } = require("discord.js");
-const { emojis } = require("../config.json");
-const { profileModals, awaitButtons, toConsole } = require("../functions.js");
-const { new_profile_1, edit_image } = require("../modals.js");
+const { emojis } = require("../configs/config.json");
+const { profileModals, awaitButtons, toConsole, uppercaseFirst } = require("../functions.js");
+const { new_profile_1, edit_image } = require("../configs/modals.js");
 const { default: fetch } = require("node-fetch");
 const { Op } = require("sequelize");
 
@@ -40,6 +40,11 @@ module.exports = {
           return option
             .setName("user")
             .setDescription("The user to list characters for");
+        })
+        .addStringOption(option => {
+          return option
+            .setName("search")
+            .setDescription("The name to search for");
         });
     })
     .addSubcommand(command => {
@@ -65,10 +70,26 @@ module.exports = {
    */
   run: async (client, interaction, options) => {
     const row = new ActionRowBuilder();
-    const subcommand = options.getSubcommand();
-    const character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
+    let subcommand = options.getSubcommand();
+    let character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
     if(!/(new)/.test(subcommand)) await interaction.deferReply({ ephemeral: !/(view|list)/.test(subcommand) });
     const filter = (i) => i.user.id == interaction.user.id; 
+
+    // Find details on specific character
+    if(subcommand === "list" && options.getString("search") != undefined) {
+      subcommand = "view";
+      const characters = await client.models.Character.findAll({ where: { name: { [Op.substring]: "%" + options.getString("search") + "%" }, discordId: options.getUser("user") ? options.getUser("user").id : interaction.user.id } });
+      if(characters.length == 0)
+        subcommand = "list";
+      else {
+        const active = await client.models.Character.findOne({ where: { discordId: characters[0].discordId, name: characters[0].name } });
+        if(!active)
+          subcommand = "list";
+        else
+          character = active;
+      }
+    }
+
     if(subcommand === "new") {
       return interaction.showModal(new_profile_1);
     } else if(subcommand === "edit") {
@@ -235,6 +256,29 @@ module.exports = {
       const stats = await client.models.Stats.findOne({ where: { character: character.cId } });
       const mementos = await client.models.Memento.findAll({ where: { character: character.cId } });
       const items = await client.models.Item.findAll({ where: { owner: character.cId } });
+      const digestions = await client.models.Digestion.findAll({ where: { [Op.or]: { prey: character.cId, predator: character.cId } } });
+      const currentPrey = [];
+      for(let prey of digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey != character.cId)) {
+        let status = prey.status;
+        switch(status) {
+        case "Vored":
+          status = `who was ${prey.type} vored`;
+          break;
+        case "Voring":
+          status = `who is being ${prey.type} vored`;
+          break;
+        case "Digesting":
+          status = `who was vored ${prey.type} vored but is digesting`;
+          break;
+        }
+        prey = await client.models.Character.findOne({ where: { cId: prey.prey } });
+        currentPrey.push({ name: prey.name, status: status });
+      }
+      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status));
+      if(currentPred.length > 0)
+        currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
+      else
+        currentPred = "Nobody yet!";
       const embeds = [
         new EmbedBuilder({
           title: character.name,
@@ -249,17 +293,17 @@ module.exports = {
           fields: [
             {
               name: "Vore Role",
-              value: `${character.role.split(" ").map(v => v.charAt(0).toUpperCase()+v.slice(1)).join(" ")}`,
+              value: `${character.role.split(" ").map(v => uppercaseFirst(v))}`,
               inline: true
             },
             {
               name: "Gender",
-              value: `${character.gender.charAt(0).toUpperCase()}${character.gender.slice(1)}`,
+              value: String(uppercaseFirst(character.gender)),
               inline: true
             },
             {
               name: "Species",
-              value: `${character.species.charAt(0).toUpperCase()}${character.species.slice(1)}`,
+              value: String(uppercaseFirst(character.species)),
               inline: true
             },
             {
@@ -279,21 +323,33 @@ module.exports = {
             },
             {
               name: "Whitelist",
-              value: JSON.parse(character.whitelist).map(v => v.charAt(0).toUpperCase()+v.slice(1)).join(", "),
+              value: JSON.parse(character.whitelist).map(v => uppercaseFirst(v)).join(", "),
               inline: true
             },
             {
               name: "Blacklist",
-              value: JSON.parse(character.blacklist).map(v => v.charAt(0).toUpperCase()+v.slice(1)).join(", "),
+              value: JSON.parse(character.blacklist).map(v => uppercaseFirst(v)).join(", "),
               inline: true
             }
-          ]
+          ],
+          footer: {
+            text: `Owned by ${character.discordId}`
+          }
         }),
         new EmbedBuilder({
           title: `${character.name} | Stats`,
           thumbnail: { url: images.profile },
           color: Math.floor(Math.random() * 16777215),
           fields: [
+            {
+              name: "Spending some time inside of...",
+              value: `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>`,
+              inline: true
+            },
+            {
+              name: "Enjoying the taste of some prey...",
+              value: `...which includes: ${currentPrey.length > 0 ? currentPrey.map((obj) => `${obj.name} ${obj.status.toLowerCase()}`).join(", ") : "Nobody yet!"}`,
+            },
             {
               name: "Health",
               value: stats.health,
@@ -310,11 +366,6 @@ module.exports = {
               inline: true
             },
             {
-              name: "Status",
-              value: character.busy ? "Being vored!" : "Free",
-              inline: true
-            },
-            {
               name: "Digestion Strength",
               value: stats.digestion,
               inline: true
@@ -324,7 +375,10 @@ module.exports = {
               value: stats.defiance,
               inline: true
             }
-          ]
+          ],
+          footer: {
+            text: `Owned by ${character.discordId}`
+          }
         }),
         new EmbedBuilder({
           title: `${character.name} | Images`,
@@ -391,7 +445,10 @@ module.exports = {
               value: images.unbirthPrey === " " ? "No image" : images.unbirthPrey,
               inline: false
             }
-          ]
+          ],
+          footer: {
+            text: `Owned by ${character.discordId}`
+          }
         }),
         new EmbedBuilder({
           title: `${character.name} | Mementos`,
@@ -403,7 +460,10 @@ module.exports = {
               value: memento.description,
               inline: true
             };
-          })
+          }),
+          footer: {
+            text: `Owned by ${character.discordId}`
+          }
         }),
         new EmbedBuilder({
           title: `${character.name} | Items`,
@@ -415,7 +475,10 @@ module.exports = {
               value: item.description,
               inline: true
             };
-          })
+          }),
+          footer: {
+            text: `Owned by ${character.discordId}`
+          }
         })
       ];
       let page = 0;

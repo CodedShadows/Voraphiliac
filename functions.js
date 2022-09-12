@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, EmbedBuilder, Interaction, ActionRow, ButtonComponent, SelectMenuComponent, SelectMenuInteraction, SelectMenuOptionBuilder, ComponentType, TextInputBuilder, TextInputStyle, TextInputComponent } = require("discord.js");
-const config = require("./config.json");
+const config = require("./configs/config.json");
 
 const errors = {
   "[ERR-SQL]": "An error has occurred while trying to execute a database query",
@@ -40,14 +40,14 @@ module.exports = {
     const check = await channel.send({ embeds: [{
       title: "Message to Console",
       color: 0xDE2821,
-      description: `${message}`,
+      description: `${message ?? "No message. Please check the source for errors!"}`,
       footer: {
         text: `Source: ${source} @ ${new Date().toLocaleTimeString()} ${new Date().toString().match(/GMT([+-]\d{2})(\d{2})/)[0]}`
       },
       timestamp: new Date()
     }] })
-      .then(false)
-      .catch(true); // Supress errors
+      .then(() => { return false; })
+      .catch(() => { return true; }); // Supress errors
     if(check) return console.error("[ERR] toConsole called but message failed to send");
 
     return null;
@@ -215,6 +215,14 @@ module.exports = {
     }
 
     return duration;
+  },
+
+  /**
+   * @param {string} str String to capitalize the first letter on
+   * @returns {string}
+   */
+  uppercaseFirst(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   },
 
   // -- //

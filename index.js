@@ -1,14 +1,16 @@
 const { Client, Collection, IntentsBitField, Partials } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Sequelize } = require("sequelize");
-const { Routes, InteractionType } = require("discord-api-types/v10");
+const { Routes, InteractionType, ComponentType } = require("discord-api-types/v10");
 const { interactionEmbed, toConsole } = require("./functions.js");
-const config = require("./config.json");
+const config = require("./configs/config.json");
+const responses = require("./configs/responses.json");
 const rest = new REST({ version: 10 }).setToken(config.bot.token);
 const fs = require("node:fs");
 const wait = require("node:util").promisify(setTimeout);
 const warnedGuilds = [];
-let ready = false;
+let ready = false,
+  clientReady = false;
 
 //#region Setup
 // Database
@@ -96,6 +98,17 @@ client.models = sequelize.models;
     // Refresh based on environment
     if(process.env.environment === "development") {
       console.warn("[APP-CMD] Development environment detected, refreshing application commands");
+      
+      await rest.get(
+        Routes.applicationCommands(config.bot.applicationId)
+      )
+        .then(commands => commands.forEach((command) => {
+          console.info("Deleting global command " + command.name);
+          rest.delete(
+            Routes.applicationCommand(config.bot.applicationId, command.id)
+          );
+        }));
+
       await rest.put(
         Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId),
         { body: slashCommands }
@@ -115,6 +128,8 @@ client.models = sequelize.models;
   }
   console.info("[FILE-LOAD] All files loaded successfully");
   ready = true;
+  if(clientReady) toConsole("[READY] Commands **can** be received!", new Error().stack, client);
+  clientReady = true;
 })();
 //#endregion
 
@@ -123,6 +138,7 @@ client.on("ready", async () => {
   console.info("[READY] Client is ready");
   console.info(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at ${new Date()}`);
   toConsole(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at <t:${Math.floor(Date.now()/1000)}:T>. Client ${ready ? "can" : "**cannot**"} receive commands!`, new Error().stack, client);
+  clientReady = true;
   // Set the status to new Date();
   client.guilds.cache.each(g => g.members.fetch());
   client.user.setActivity(`${client.users.cache.size} users across ${client.guilds.cache.size} servers`, { type: "LISTENING" });
@@ -130,7 +146,7 @@ client.on("ready", async () => {
   try {
     await sequelize.authenticate();
     console.info("[DB] Passed validation");
-    await sequelize.sync({ alter: process.env.environment === "development" });
+    await sequelize.sync({ alter: process.env.environment === "developmentt" });
     console.info("[DB] Synchronized the database");
   } catch(e) {
     console.warn("[DB] Failed validation");
@@ -183,6 +199,29 @@ client.on("interactionCreate", async (interaction) => {
         .then(m => {
           if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "The modal timed out and failed to reply in 10 seconds", interaction, client, [true, 15]);
         });
+    }
+  } else if(interaction.type === InteractionType.MessageComponent && interaction.componentType === ComponentType.Button) {
+    if(!/_(yes|no)/.test(interaction.customId)) return;
+    await interaction.deferUpdate();
+    const [type, answer] = interaction.customId.split("_");
+    const regex = /\*Psst!\* ((?<preyName>.+) \(<@(?<preyDiscord>[0-9]{18,})>\)), .+ by ((?<predName>.+) \(<@(?<predDiscord>[0-9]{18,})>\))/;
+    const { predName, predDiscord, preyName, preyDiscord } = interaction.message.content.match(regex).groups;
+    console.info(predName, predDiscord, preyName, preyDiscord);
+    const prey = await client.models.Character.findOne({ where: { name: preyName } });
+    if(interaction.user.id === preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
+    if((await interaction.guild.members.fetch(predDiscord).catch(() => { return null; })) === null) {
+      if(prey.discordId != preyDiscord) return; // User deleted character
+      await client.models.Digestion.update({ status: "Free" }, { where: { status: "Voring", prey: prey.cId } });
+      return interaction.editReply({ content: "*For some reason, you notice that your predator is gone. They must've left the server.*", components: [] });
+    }
+    if(answer === "yes") {
+      const res = responses[type];
+      const random = Math.floor(Math.random() * res.length);
+      await client.models.Digestion.update({ status: "Vored" }, { where: { status: "Voring", prey: prey.cId }});
+      return interaction.editReply({ content: res[random].replaceAll("{{prey}}", preyName).replaceAll("{{pred}}", predName), components: [] });
+    } else {
+      await client.models.Digestion.destroy({ where: { status: "Voring", prey: prey.cId }});
+      return interaction.editReply({ content: `*Unfortunately, ${preyName} didn't consent and as such, they escaped from ${predName}. Maybe try a more willing prey?*`, components: [] });
     }
   } else if(interaction.type === InteractionType.MessageComponent) {
     return;

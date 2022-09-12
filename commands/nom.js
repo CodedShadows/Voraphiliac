@@ -67,9 +67,9 @@ module.exports = {
     const vDigestions_pred = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, predator: victim.cId } });
     const vDigestions_prey = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, prey: victim.cId } });
     // Check whitelist and blacklist
-    if(JSON.parse(character.blacklist).includes(type) || (!JSON.parse(character.whitelist).includes(type) && !JSON.parse(character.whitelist).includes("All")))
+    if(JSON.parse(character.blacklist).includes(type) || (!JSON.parse(character.whitelist).includes(type) && !JSON.parse(character.whitelist).includes("all")))
       return interaction.editReply({ content: `${emojis.failure} | ${JSON.parse(character.blacklist).includes(type) ? "Your character's blacklist contains the vore you are trying to do" : "Your character's whitelist does not have the type of vore you are trying to do"}` });
-    if(JSON.parse(victim.blacklist).includes(type) || (!JSON.parse(victim.whitelist).includes(type) && !JSON.parse(victim.whitelist).includes("All")))
+    if(JSON.parse(victim.blacklist).includes(type) || (!JSON.parse(victim.whitelist).includes(type) && !JSON.parse(victim.whitelist).includes("all")))
       return interaction.editReply({ content: `${emojis.failure} | ${JSON.parse(victim.blacklist).includes(type) ? "Your victim's blacklist contains the vore you are trying to do" : "Your victim's whitelist does not have the type of vore you are trying to do"}` });
     // Check if either is busy
     if(cDigestions_pred.some(d => /(Voring|Digesting)/.test(d.status)))

@@ -208,7 +208,7 @@ client.on("interactionCreate", async (interaction) => {
     const { predName, predDiscord, preyName, preyDiscord } = interaction.message.content.match(regex).groups;
     console.info(predName, predDiscord, preyName, preyDiscord);
     const prey = await client.models.Character.findOne({ where: { name: preyName } });
-    if(interaction.user.id === preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
+    if(interaction.user.id != preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
     if((await interaction.guild.members.fetch(predDiscord).catch(() => { return null; })) === null) {
       if(prey.discordId != preyDiscord) return; // User deleted character
       await client.models.Digestion.update({ status: "Free" }, { where: { status: "Voring", prey: prey.cId } });

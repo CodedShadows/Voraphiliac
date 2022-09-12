@@ -343,7 +343,7 @@ module.exports = {
           fields: [
             {
               name: "Spending some time inside of...",
-              value: `${currentPred.name ? `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>` : currentPred}`,
+              value: `${currentPred.name != undefined ? `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>` : currentPred}`,
               inline: true
             },
             {

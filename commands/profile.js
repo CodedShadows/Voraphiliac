@@ -274,7 +274,7 @@ module.exports = {
         prey = await client.models.Character.findOne({ where: { cId: prey.prey } });
         currentPrey.push({ name: prey.name, status: status });
       }
-      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status));
+      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.predator != character.cId);
       if(currentPred.length > 0)
         currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
       else

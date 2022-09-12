@@ -276,7 +276,7 @@ module.exports = {
       }
       let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status));
       if(currentPred.length > 0)
-        currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } }).name;
+        currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
       else
         currentPred = "Nobody yet!";
       const embeds = [

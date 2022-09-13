@@ -114,6 +114,16 @@ client.models = sequelize.models;
         { body: slashCommands }
       );
     } else {
+      await rest.get(
+        Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId)
+      )
+        .then(commands => commands.forEach((command) => {
+          console.info("Deleting guild command " + command.name);
+          rest.delete(
+            Routes.applicationGuildCommand(config.bot.applicationId, config.bot.guildId, command.id)
+          );
+        }));
+      
       await rest.put(
         Routes.applicationCommands(config.bot.applicationId),
         { body: slashCommands }
@@ -160,26 +170,29 @@ client.on("ready", async () => {
 
     // -- //
 
-    client.models.Digestion.findAll({ where: { updatedAt: {[Op.lte]: new Date(Math.floor(Date.now()/1000)-21600) }} }).forEach(async (digestion) => {
-      const prey = await client.models.Character.findAll({ where: { cId: digestion.prey } });
-      const stats = await client.models.Status.findAll({ where: { character: { [Op.or]: [digestion.predator, digestion.prey] } }});
-      const predStats = stats.filter(c => c.cId === digestion.predator);
-      const preyStats = stats.filter(c => c.cId === digestion.prey);
-      let health = 0;
-      if((preyStats.arousal > (45 - predStats.resistance)) && (preyStats.euphoria - (preyStats.defiance*2)) < 50)
-        return; // Too aroused to heal
-      if(preyStats.defiance > predStats.digestion)
-        health += 5;
-      else if(preyStats.defiance == predStats.digestion)
-        health += 3;
-      else
-        health += 1;
-      if(prey.health === 115)
-        health = 0; // Full health, can't regen
-      if(prey.health + health > 115)
-        health = 115 - prey.health;
-      await client.models.Character.update({ health: prey.health + health }, { where: { cId: digestion.prey }});
-    });
+    client.models.Digestion.findAll({ where: { updatedAt: {[Op.lte]: new Date(Math.floor(Date.now()/1000)-21600) }} })
+      .then((digestions) => {
+        digestions.forEach(async (digestion) => {
+          const prey = await client.models.Character.findAll({ where: { cId: digestion.prey } });
+          const stats = await client.models.Status.findAll({ where: { character: { [Op.or]: [digestion.predator, digestion.prey] } }});
+          const predStats = stats.filter(c => c.cId === digestion.predator);
+          const preyStats = stats.filter(c => c.cId === digestion.prey);
+          let health = 0;
+          if((preyStats.arousal > (45 - predStats.resistance)) && (preyStats.euphoria - (preyStats.defiance*2)) < 50)
+            return; // Too aroused to heal
+          if(preyStats.defiance > predStats.digestion)
+            health += 5;
+          else if(preyStats.defiance == predStats.digestion)
+            health += 3;
+          else
+            health += 1;
+          if(prey.health === 115)
+            health = 0; // Full health, can't regen
+          if(prey.health + health > 115)
+            health = 115 - prey.health;
+          await client.models.Character.update({ health: prey.health + health }, { where: { cId: digestion.prey }});
+        });
+      });
   }, 60000);
 });
 

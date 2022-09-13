@@ -146,7 +146,7 @@ client.on("ready", async () => {
   try {
     await sequelize.authenticate();
     console.info("[DB] Passed validation");
-    await sequelize.sync({ alter: process.env.environment === "developmentt" });
+    await sequelize.sync({ alter: process.env.environment === "development" });
     console.info("[DB] Synchronized the database");
   } catch(e) {
     console.warn("[DB] Failed validation");

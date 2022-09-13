@@ -62,10 +62,11 @@ module.exports = {
     const victim = await client.models.Character.findOne({ where: { discordId: target.id, active: true } });
     if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
     if(!victim) return interaction.editReply({ content: `${emojis.failure} | Your target doesn't have an active character` });
-    const cDigestions_pred = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, predator: character.cId } });
-    const cDigestions_prey = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, prey: character.cId } });
-    const vDigestions_pred = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, predator: victim.cId } });
-    const vDigestions_prey = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, prey: victim.cId } });
+    const digestions = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, prey: { [Op.or]: [character.cId, victim.cId] }}, predator: { [Op.or]: [character.cId, victim.cId] } });
+    const cDigestions_pred = digestions.filter(d => d.predator === character.cId);
+    const cDigestions_prey = digestions.filter(d => d.prey === character.cId);
+    const vDigestions_pred = digestions.filter(d => d.predator === victim.cId);
+    const vDigestions_prey = digestions.filter(d => d.prey === victim.cId);
     // Check whitelist and blacklist
     if(JSON.parse(character.blacklist).includes(type) || (!JSON.parse(character.whitelist).includes(type) && !JSON.parse(character.whitelist).includes("all")))
       return interaction.editReply({ content: `${emojis.failure} | ${JSON.parse(character.blacklist).includes(type) ? "Your character's blacklist contains the vore you are trying to do" : "Your character's whitelist does not have the type of vore you are trying to do"}` });

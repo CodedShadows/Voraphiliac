@@ -15,7 +15,7 @@ module.exports.import = (sequelize) => sequelize.define("Stats", {
     allowNull: false,
     validation: {
       min: -1,
-      max: 100
+      max: 115
     }
   },
   arousal: {
@@ -44,6 +44,14 @@ module.exports.import = (sequelize) => sequelize.define("Stats", {
     allowNull: false,
     validation: {
       min: -1
+    }
+  },
+  resistance: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validation: {
+      min: -1,
+      max: 50
     }
   }
 });

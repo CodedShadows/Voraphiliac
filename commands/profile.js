@@ -374,6 +374,11 @@ module.exports = {
               name: "Defiance Strength",
               value: stats.defiance,
               inline: true
+            },
+            {
+              name: "Mental Resistance",
+              value: stats.resistance,
+              inline: true
             }
           ],
           footer: {

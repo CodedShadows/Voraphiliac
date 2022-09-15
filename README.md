@@ -1,3 +1,5 @@
+**This bot is in the "fast development" stage meaning changes will be made rapidly. Please do not expect any current features to remain the same until V1.0.0 is released. The current version is V0.X**
+
 # Voraphiliac
 This is a bot dedicated to vore because I decided that making a project big enough like this was a good idea. If you want to host it, just install Node.js and MySQL, clone this repository, and run `npm install` in the directory. Then, run `node index.js` to start the bot.
 

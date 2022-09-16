@@ -93,7 +93,7 @@ module.exports = {
     // Check if character is vored
     for(let digestion in cDigestions_prey.filter(d => d.status === "Vored")) {
       digestion = cDigestions_prey.filter(d => d.status === "Vored")[digestion];
-      console.info(digestion, victim);
+      
       // If the character is vored by the victim
       if(digestion.predator === victim.cId)
         return interaction.editReply({ content: "*You look at your current predicament and realise something. You're vored by the person you're trying to vore. Escaping is probably a good idea.*" });

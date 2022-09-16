@@ -33,7 +33,7 @@ module.exports = {
       if((await client.models.Character.findOne({ where: { discordId: interaction.user.id, name: fields.getTextInputValue("name") } }))) return interaction.editReply({ content: "You already have a character with that name!" });
       // if a character with a name LIKE the one entered already exists, ask if they want to continue
       const similarChar = await client.models.Character.findOne({ where: { discordId: interaction.user.id, name: { [Op.substring]: fields.getTextInputValue("name") } } });
-      if(similarChar != undefined) {
+      if(similarChar !== undefined) {
         await interaction.editReply({ content: `${emojis.warning} | You have a character that has a name like the one you entered (${similarChar.name}). Please make sure you enter the **full** name when using \`/profile switch\`` });
         await require("node:util").promisify(setTimeout)(5000);
       }
@@ -45,12 +45,12 @@ module.exports = {
           active: false,
           busy: false,
           name: fields.getTextInputValue("name"),
-          role: fields.getTextInputValue("role").toLowerCase().match(/^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i)[0],
+          role: /^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i.exec(fields.getTextInputValue("role").toLowerCase())[0],
           description: m2.fields.getTextInputValue("description"),
           gender: fields.getTextInputValue("gender").toLowerCase(),
           species: fields.getTextInputValue("species").toLowerCase(),
-          weight: m2.fields.getTextInputValue("weight").match(/^[0-9]+(\.[0-9]{1,3})?$/)[0],
-          height: m2.fields.getTextInputValue("height").match(/^[0-9]+(\.[0-9]{1,3})?$/)[0],
+          weight: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("weight"))[0],
+          height: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("height"))[0],
           whitelist: JSON.stringify(["all"]),
           blacklist: JSON.stringify(["none"]),
           autodigest: false

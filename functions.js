@@ -25,7 +25,7 @@ module.exports = {
    * @example toConsole(`Hello, World!`, new Error().stack, client);
    * @example toConsole(`Published a ban`, new Error().stack, client);
    */
-  toConsole: async (message, source, client) => {
+  async toConsole(message, source, client) {
     if(!message || !source || !client) return console.error(`One or more of the required parameters are missing.\n\n> message: ${message}\n> source: ${source}\n> client: ${client}`);
     const channel = await client.channels.cache.get(config.discord.logChannel);
     if(source.split("\n").length < 2) return console.error("[ERR] toConsole called but Error.stack was not used\n> Source: " + source);
@@ -42,7 +42,7 @@ module.exports = {
       color: 0xDE2821,
       description: `${message ?? "No message. Please check the source for errors!"}`,
       footer: {
-        text: `Source: ${source} @ ${new Date().toLocaleTimeString()} ${new Date().toString().match(/GMT([+-]\d{2})(\d{2})/)[0]}`
+        text: `Source: ${source} @ ${new Date().toLocaleTimeString()} ${/GMT([+-]\d{2})(\d{2})/.exec(new Date().toString())[0]}`
       },
       timestamp: new Date()
     }] })
@@ -64,8 +64,8 @@ module.exports = {
    * @example interactionEmbed(3, `[ERR-UPRM]`, `Missing: \`Manage Messages\``, interaction, client, [true, 15])
    * @returns {null} 
    */
-  interactionEmbed: async function(type, content, expected, interaction, client, remove) {
-    if(!type || typeof content != "string" || expected === undefined || !interaction || !client || !remove || remove.length != 2) throw new SyntaxError(`One or more of the required parameters are missing in [interactionEmbed]\n\n> ${type}\n> ${content}\n> ${expected}\n> ${interaction}\n> ${client}`);
+  async interactionEmbed(type, content, expected, interaction, client, remove) {
+    if(!type || typeof content !== "string" || expected === undefined || !interaction || !client || !remove || remove.length !== 2) throw new SyntaxError(`One or more of the required parameters are missing in [interactionEmbed]\n\n> ${type}\n> ${content}\n> ${expected}\n> ${interaction}\n> ${client}`);
     if(!interaction.deferred) await interaction.deferReply();
     const embed = new EmbedBuilder();
 
@@ -121,7 +121,7 @@ module.exports = {
     * @example awaitButtons(interaction, 15, [button1, button2], `Select a button`, true);
     * @returns {ButtonComponent|null} The button the user clicked or null if no button was clicked
     */
-  awaitButtons: async function (interaction, time, buttons, content, remove) {
+  async awaitButtons(interaction, time, buttons, content, remove) {
     if(!interaction || !time || !buttons || remove === null) return new SyntaxError(`One of the following values is not fulfilled:\n> interaction: ${interaction}\n> time: ${time}\n> buttons: ${buttons}\n> remove: ${remove}`);
     content = content ?? "Please select an option";
     
@@ -145,7 +145,7 @@ module.exports = {
     }
     // Step 5: Cleanup
     setTimeout(() => {
-      if(message != undefined && remove && res != null) message.delete();
+      if(message !== undefined && remove && res !== null) message.delete();
     }, 1500);
     await message.edit({ content: content, components: [] });
     return res;
@@ -161,7 +161,7 @@ module.exports = {
    * @example awaitMenu(interaction, 15, [menu], `Select an option`, true);
    * @returns {SelectMenuInteraction|null} The menu the user interacted with or null if nothing was selected
    */
-  awaitMenu: async function (interaction, time, values, options, content, remove) {
+  async awaitMenu(interaction, time, values, options, content, remove) {
     // Step 0: Checks
     if(!interaction || !time || !values || !options || remove === null) return new SyntaxError(`One of the following values is not fulfilled:\n> interaction: ${interaction}\n> time: ${time}\n> values: ${values}\n> options: ${options}\n> remove: ${remove}`);
     content = content ?? "Please select an option";
@@ -196,7 +196,7 @@ module.exports = {
 
     // Step 5: Cleanup
     setTimeout(() => {
-      if(message != undefined && remove && res != null) message.delete();
+      if(message !== undefined && remove && res !== null) message.delete();
     }, 1500);
     await message.edit({ content: content, components: [] });
     return res;
@@ -205,12 +205,12 @@ module.exports = {
    * @param {String} time 
    * @returns {Number|"NaN"}
    */
-  parseTime: function (time) {
+  parseTime(time) {
     let duration = 0;
-    if(!time.match(/[1-9]{1,3}[dhms]/g)) return "NaN";
+    if(!/[1-9]{1,3}[dhms]/g.test(time)) return "NaN";
 
-    for(const period of time.match(/[1-9]{1,3}[dhms]/g)) {
-      const [amount, unit] = period.match(/^(\d+)([dhms])$/).slice(1);
+    for(const period of /[1-9]{1,3}[dhms]/g.exec(time)) {
+      const [amount, unit] = /^(\d+)([dhms])$/.exec(period).slice(1);
       duration += unit === "d" ? amount * 24 * 60 * 60 : unit === "h" ? amount * 60 * 60 : unit === "m" ? amount * 60 : amount;
     }
 

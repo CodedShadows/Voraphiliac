@@ -6,6 +6,12 @@ const { new_profile_1, edit_image } = require("../configs/modals.js");
 const { default: fetch } = require("node-fetch");
 const { Op } = require("sequelize");
 
+function shortenText(text) {
+  if(text.length > 1024)
+    return text.slice(0, 1021) + "...";
+  return text;
+}
+
 module.exports = {
   name: "profile",
   data: new SlashCommandBuilder()
@@ -73,13 +79,13 @@ module.exports = {
     let subcommand = options.getSubcommand();
     let character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
     if(!/(new)/.test(subcommand)) await interaction.deferReply({ ephemeral: !/(view|list)/.test(subcommand) });
-    const filter = (i) => i.user.id == interaction.user.id; 
+    const filter = (i) => i.user.id === interaction.user.id; 
 
     // Find details on specific character
-    if(subcommand === "list" && options.getString("search") != undefined) {
+    if(subcommand === "list" && options.getString("search") !== undefined) {
       subcommand = "view";
       const characters = await client.models.Character.findAll({ where: { name: { [Op.substring]: "%" + options.getString("search") + "%" }, discordId: options.getUser("user") ? options.getUser("user").id : interaction.user.id } });
-      if(characters.length == 0)
+      if(characters.length === 0)
         subcommand = "list";
       else {
         const active = await client.models.Character.findOne({ where: { discordId: characters[0].discordId, name: characters[0].name } });
@@ -140,7 +146,7 @@ module.exports = {
         await whitelist.deleteReply();
         if(whitelist.values.includes("all")) whitelist.values = ["all"];
         if(whitelist.values.includes("none")) whitelist.values = ["none"];
-        if(whitelist.values[0] != "none" && JSON.parse(character.blacklist)[0] != "none") return interaction.editReply({ content: `${emojis.failure} | Please set your blacklist to none before updating your whitelist!`, components: [] });
+        if(whitelist.values[0] !== "none" && JSON.parse(character.blacklist)[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your blacklist to none before updating your whitelist!`, components: [] });
         try {
           await client.models.Character.update({ whitelist: JSON.stringify(whitelist.values) }, { where: { cId: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your whitelist!`, components: [] });
@@ -171,7 +177,7 @@ module.exports = {
         await blacklist.deleteReply();
         if(blacklist.values.includes("all")) blacklist.values = ["all"];
         if(blacklist.values.includes("none")) blacklist.values = ["none"];
-        if(blacklist.values[0] != "none" && JSON.parse(character.whitelist)[0] != "none") return interaction.editReply({ content: `${emojis.failure} | Please set your whitelist to none before updating your blacklist!`, components: [] });
+        if(blacklist.values[0] !== "none" && JSON.parse(character.whitelist)[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your whitelist to none before updating your blacklist!`, components: [] });
         try {
           await client.models.Character.update({ blacklist: JSON.stringify(blacklist.values) }, { where: { cId: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your blacklist!`, components: [] });
@@ -248,7 +254,7 @@ module.exports = {
       if(!char) return interaction.editReply({ content: `${emojis.failure} | You don't have a character with that name!` });
       if(character && char.cId === character.cId) return interaction.editReply({ content: `${emojis.failure} | That character is already active. Try using their full name if you think this is a mistake` });
       await client.models.Character.update({ active: true }, { where: { cId: char.cId } });
-      if(character != undefined) await client.models.Character.update({ active: false }, { where: { cId: character.cId } });
+      if(character !== undefined) await client.models.Character.update({ active: false }, { where: { cId: character.cId } });
       return interaction.editReply({ content: `${emojis.success} | Successfully switched to ${char.name}!` });
     } else if(subcommand === "view") {
       if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
@@ -258,7 +264,7 @@ module.exports = {
       const items = await client.models.Item.findAll({ where: { owner: character.cId } });
       const digestions = await client.models.Digestion.findAll({ where: { [Op.or]: { prey: character.cId, predator: character.cId } } });
       const currentPrey = [];
-      for(let prey of digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey != character.cId)) {
+      for(let prey of digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey !== character.cId)) {
         let status = prey.status;
         switch(status) {
         case "Vored":
@@ -271,10 +277,12 @@ module.exports = {
           status = `who was vored ${prey.type} vored but is digesting`;
           break;
         }
-        prey = await client.models.Character.findOne({ where: { cId: prey.prey } });
-        currentPrey.push({ name: prey.name, status: status });
+        prey = client.models.Character.findOne({ where: { cId: prey.prey } });
+        currentPrey.push(prey);
       }
-      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.predator != character.cId);
+      await Promise.all(currentPrey);
+      currentPrey.map(p => { return {name: p.name, status: p.status}; });
+      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.predator !== character.cId);
       if(currentPred.length > 0)
         currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
       else
@@ -343,7 +351,7 @@ module.exports = {
           fields: [
             {
               name: "Spending some time inside of...",
-              value: `${typeof currentPred != "string" ? `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>` : currentPred}`,
+              value: `${typeof currentPred !== "string" ? `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>` : currentPred}`,
               inline: true
             },
             {
@@ -555,9 +563,3 @@ module.exports = {
     }
   }
 };
-
-function shortenText(text) {
-  if(text.length > 1024)
-    return text.slice(0, 1021) + "...";
-  return text;
-}

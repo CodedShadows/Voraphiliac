@@ -103,7 +103,7 @@ client.models = sequelize.models;
       await rest.get(
         Routes.applicationCommands(config.bot.applicationId)
       )
-        .then(commands => commands.forEach((command) => {
+        .then(cs => cs.forEach((command) => {
           console.info("Deleting global command " + command.name);
           rest.delete(
             Routes.applicationCommand(config.bot.applicationId, command.id)
@@ -118,7 +118,7 @@ client.models = sequelize.models;
       await rest.get(
         Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId)
       )
-        .then(commands => commands.forEach((command) => {
+        .then(cs => cs.forEach((command) => {
           console.info("Deleting guild command " + command.name);
           rest.delete(
             Routes.applicationGuildCommand(config.bot.applicationId, config.bot.guildId, command.id)
@@ -183,7 +183,7 @@ client.on("ready", async () => {
             return; // Too aroused to heal
           if(preyStats.defiance > predStats.digestion)
             health += 5;
-          else if(preyStats.defiance == predStats.digestion)
+          else if(preyStats.defiance === predStats.digestion)
             health += 3;
           else
             health += 1;
@@ -215,7 +215,7 @@ client.on("interactionCreate", async (interaction) => {
         });
       
       await wait(1e4);
-      if(ack != null) return; // Already executed
+      if(ack !== null) return; // Already executed
       interaction.fetchReply()
         .then(m => {
           if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "The command timed out and failed to reply in 10 seconds", interaction, client, [true, 15]);
@@ -231,7 +231,7 @@ client.on("interactionCreate", async (interaction) => {
         });
 
       await wait(1e4);
-      if(ack != null) return; // Already executed
+      if(ack !== null) return; // Already executed
       interaction.fetchReply()
         .then(m => {
           if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "The modal timed out and failed to reply in 10 seconds", interaction, client, [true, 15]);
@@ -242,12 +242,11 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.deferUpdate();
     const [type, answer] = interaction.customId.split("_");
     const regex = /\*Psst!\* ((?<preyName>.+) \(<@(?<preyDiscord>[0-9]{18,})>\)), .+ by ((?<predName>.+) \(<@(?<predDiscord>[0-9]{18,})>\))/;
-    const { predName, predDiscord, preyName, preyDiscord } = interaction.message.content.match(regex).groups;
-    console.info(predName, predDiscord, preyName, preyDiscord);
+    const { predName, predDiscord, preyName, preyDiscord } = regex.exec(interaction.message.content).groups;
     const prey = await client.models.Character.findOne({ where: { name: preyName } });
-    if(interaction.user.id != preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
+    if(interaction.user.id !== preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
     if((await interaction.guild.members.fetch(predDiscord).catch(() => { return null; })) === null) {
-      if(prey.discordId != preyDiscord) return; // User deleted character
+      if(prey.discordId !== preyDiscord) return; // User deleted character
       await client.models.Digestion.update({ status: "Free" }, { where: { status: "Voring", prey: prey.cId } });
       return interaction.editReply({ content: "*For some reason, you notice that your predator is gone. They must've left the server.*", components: [] });
     }

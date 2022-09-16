@@ -98,7 +98,7 @@ module.exports = {
       if(digestion.predator === victim.cId)
         return interaction.editReply({ content: "*You look at your current predicament and realise something. You're vored by the person you're trying to vore. Escaping is probably a good idea.*" });
       // If the victim hasn't been vored by the character's predator
-      else if(digestion.predator != vDigestions_prey.filter(d => d.status === "Vored").predator)
+      else if(digestion.predator !== vDigestions_prey.filter(d => d.status === "Vored").predator)
         return interaction.editReply({ content: "*Inside your predator, you look around. For some reason, you can't find your prey anywhere in sight!*" });
     }
 

@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: server-pez
+    runs-on: self-hosted
 
     strategy:
       matrix:

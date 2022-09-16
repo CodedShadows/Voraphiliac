@@ -85,7 +85,7 @@ module.exports = {
       interaction.editReply({ content: `Success! Your character, \`${fields.getTextInputValue("name")}\`, has been added to the database. Use \`/profile switch\` to switch to them` });
     });
 
-    confirm.on("end", async () => {
+    confirm.on("end", () => {
       interaction.editReply({ content: "Please fill out the form if it was shown to you. If it was not, please re-run the command again!", components: [] });
     });
   }

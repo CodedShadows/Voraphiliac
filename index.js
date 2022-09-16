@@ -254,7 +254,7 @@ process.on("unhandledRejection", async (promise) => {
   if(String(promise).includes("Interaction has already been acknowledged.") || String(promise).includes("Unknown interaction") || String(promise).includes("Unknown Message")) return suppressChannel.send(`A suppressed error has occured at process.on(unhandledRejection):\n>>> ${promise}`);
   toConsole(`An [unhandledRejection] has occurred.\n\n> ${promise}`, new Error().stack, client);
 });
-process.on("warning", async (warning) => {
+process.on("warning", (warning) => {
   toConsole(`A [warning] has occurred.\n\n> ${warning}`, new Error().stack, client);
 });
 //#endregion

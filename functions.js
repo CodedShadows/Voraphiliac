@@ -30,7 +30,7 @@ module.exports = {
     const channel = await client.channels.cache.get(config.discord.logChannel);
     if(source.split("\n").length < 2) return {};
     source = source.split("\n")[1].trim().replace("at ", "").replaceAll("\\", "/");
-    if(/^.+ \(.+\)/.test(source)) source.split("(")[1];
+    if(/^.+ \(.+\)/.test(source)) source = source.split("(")[1];
     // eslint-disable-next-line no-useless-escape
     source = source.split("/")[source.split("/").length - 1].replaceAll(":", "\:").replace(")", "");
     if(!channel) return {};

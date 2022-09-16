@@ -8,7 +8,7 @@ module.exports = {
    * @param {ModalSubmitInteraction} interaction
    * @param {ModalSubmitFields} fields
    */
-  run: async (client, interaction, fields) => {
+  run: (client, interaction, fields) => {
     return [client, interaction, fields];
     // Return as it's awaited elsewhere
   }

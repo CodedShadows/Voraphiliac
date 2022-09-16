@@ -26,15 +26,14 @@ module.exports = {
    * @example toConsole(`Published a ban`, new Error().stack, client);
    */
   async toConsole(message, source, client) {
-    if(!message || !source || !client) return {}
+    if(!message || !source || !client) return {};
     const channel = await client.channels.cache.get(config.discord.logChannel);
-    if(source.split("\n").length < 2) return {}
+    if(source.split("\n").length < 2) return {};
     source = source.split("\n")[1].trim().replace("at ", "").replaceAll("\\", "/");
     if(/^.+ \(.+\)/.test(source)) source.split("(")[1];
     // eslint-disable-next-line no-useless-escape
     source = source.split("/")[source.split("/").length - 1].replaceAll(":", "\:").replace(")", "");
-    if(!channel) return {}
-    if(process.env.environment === "development") {}
+    if(!channel) return {};
 
     await channel.send(`Incoming message from \`${source}\` at <t:${Math.floor(Date.now()/1000)}:F>`);
     const check = await channel.send({ embeds: [{
@@ -48,7 +47,7 @@ module.exports = {
     }] })
       .then(() => { return false; })
       .catch(() => { return true; }); // Supress errors
-    if(check) return {}
+    if(check) return {};
 
     return null;
   },

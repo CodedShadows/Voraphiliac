@@ -20,16 +20,13 @@ const sequelize = new Sequelize(process.env.DBname, process.env.DBuser, process.
   logging: {},
 });
 if(!fs.existsSync("./models")) {
-  
+  fs.mkdirSync("./models");
 } else {
-  
   const models = fs.readdirSync("models").filter(file => file.endsWith(".js"));
-  
   for(const model of models) {
     try {
       const file = require(`./models/${model}`);
       file.import(sequelize);
-      
     } catch(e) {
       console.error(`[DB] Unloaded ${model}`);
       console.error(`[DB] ${e}`);
@@ -49,17 +46,13 @@ client.sequelize = sequelize;
 client.models = sequelize.models;
 
 (async () => {
-  if(!fs.existsSync("./commands")) return {}
+  if(!fs.existsSync("./commands")) return {};
   const commands = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
-  
 
   for(let file of commands) {
     try {
-      
       let command = require(`./commands/${file}`);
-
       if(command.name) {
-        
         slashCommands.push(command.data.toJSON());
         client.commands.set(command.name, command);
       }
@@ -69,42 +62,29 @@ client.models = sequelize.models;
     }
   }
   
-
   if(!fs.existsSync("./modals")) await fs.mkdirSync("./modals");
   const modals = fs.readdirSync("./modals").filter(file => file.endsWith(".js"));
   
   for(let file of modals) {
     try {
-      
       let modal = require(`./modals/${file}`);
-
-      if(modal.name) {
-        
+      if(modal.name)
         client.modals.set(modal.name, modal);
-      }
     } catch(e) {
       console.warn(`[MDL-LOAD] Unloaded: ${file}`);
       console.warn(`[MDL-LOAD] ${e}`);
     }
   }
   
-
-  
   await wait(500); // Artificial wait to prevent instant sending
-  const now = Date.now();
 
   try {
-    
-
     // Refresh based on environment
     if(process.env.environment === "development") {
-      
-      
       await rest.get(
         Routes.applicationCommands(config.bot.applicationId)
       )
-        .then(cs => cs.forEach((command) => {
-          
+        .then(cmds => cmds.forEach((command) => {
           rest.delete(
             Routes.applicationCommand(config.bot.applicationId, command.id)
           );
@@ -118,8 +98,7 @@ client.models = sequelize.models;
       await rest.get(
         Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId)
       )
-        .then(cs => cs.forEach((command) => {
-          
+        .then(cmds => cmds.forEach((command) => {
           rest.delete(
             Routes.applicationGuildCommand(config.bot.applicationId, config.bot.guildId, command.id)
           );
@@ -130,9 +109,6 @@ client.models = sequelize.models;
         { body: slashCommands }
       );
     }
-    
-    const then = Date.now();
-    
   } catch(error) {
     console.error("[APP-CMD] An error has occurred while attempting to refresh application commands.");
     console.error(`[APP-CMD] ${error}`);
@@ -146,8 +122,6 @@ client.models = sequelize.models;
 
 //#region Events
 client.on("ready", async () => {
-  
-  
   toConsole(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at <t:${Math.floor(Date.now()/1000)}:T>. Client ${ready ? "can" : "**cannot**"} receive commands!`, new Error().stack, client);
   clientReady = true;
   // Set the status to new Date();
@@ -156,9 +130,7 @@ client.on("ready", async () => {
 
   try {
     await sequelize.authenticate();
-    
     await sequelize.sync({ alter: process.env.environment === "development" });
-    
   } catch(e) {
     console.warn("[DB] Failed validation");
     console.error(e);
@@ -269,34 +241,20 @@ client.login(process.env.token);
 
 //#region Error handling
 process.on("uncaughtException", (err, origin) => {
-  if(!ready) {
-    
-    
+  if(!ready)
     return process.exit(14);
-  }
   toConsole(`An [uncaughtException] has occurred.\n\n> ${err}\n> ${origin}`, new Error().stack, client);
 });
 process.on("unhandledRejection", async (promise) => {
-  if(!ready) {
-    
-    
+  if(!ready)
     return process.exit(15);
-  }
-  if(process.env.environment === "development") return {}
+  if(process.env.environment === "development") return {};
   const suppressChannel = await client.channels.fetch(config.discord.suppressChannel).catch(() => { return undefined; });
-  if(!suppressChannel) return {}
+  if(!suppressChannel) return {};
   if(String(promise).includes("Interaction has already been acknowledged.") || String(promise).includes("Unknown interaction") || String(promise).includes("Unknown Message")) return suppressChannel.send(`A suppressed error has occured at process.on(unhandledRejection):\n>>> ${promise}`);
   toConsole(`An [unhandledRejection] has occurred.\n\n> ${promise}`, new Error().stack, client);
 });
 process.on("warning", async (warning) => {
-  if(!ready) {
-    
-    
-  }
   toConsole(`A [warning] has occurred.\n\n> ${warning}`, new Error().stack, client);
-});
-process.on("exit", (code) => {
-  
-  
 });
 //#endregion

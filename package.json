@@ -5,7 +5,7 @@
     "discord.js": "14.3.0",
     "mysql2": "2.3.3",
     "node-fetch": "2.6.7",
-    "sequelize": "6.21.6"
+    "sequelize": "6.22.0"
   },
   "devDependencies": {
     "eslint": "8.23.1"

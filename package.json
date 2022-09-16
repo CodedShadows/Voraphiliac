@@ -9,5 +9,23 @@
   },
   "devDependencies": {
     "eslint": "8.23.1"
-  }
+  },
+  "name": "voraphiliac",
+  "description": "Vore bot that utilizes Discord's Interaction system for a unique experience.",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Coder-Tavi/Voraphiliac.git"
+  },
+  "keywords": [],
+  "author": "Tavi",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/Coder-Tavi/Voraphiliac/issues"
+  },
+  "homepage": "https://github.com/Coder-Tavi/Voraphiliac#readme"
 }

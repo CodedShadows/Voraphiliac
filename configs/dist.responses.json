@@ -1,0 +1,6 @@
+{
+  "⚠": "rename to 'responses.json' and populate with content",
+  "typeOfVore": [
+    "{{pred}} {{prey}}"
+  ]
+}

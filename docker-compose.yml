@@ -1,0 +1,30 @@
+version: '3.3'
+services:
+  app:
+    build:
+      context: ./
+    depends_on:
+      - db
+    restart: always
+    environment:
+      token:
+      DBhost:
+      DBname:
+      DBuser:
+      DBpassword:
+  db:
+    image: mariadb:latest
+    restart: always
+    # exposed for now, will be closed after setup
+    ports:
+      - "${DBextPort}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DBrootPassword}
+      MYSQL_DATABASE: ${DBname}
+      MYSQL_USER: ${DBuser}
+      MYSQL_PASSWORD: ${DBpassword}
+
+volumes:
+  db_data:

@@ -1,0 +1,16 @@
+{
+  "⚠": "rename to 'config.json' and populate with content",
+  "bot": {
+    "applicationId": "0",
+    "guildId": "0"
+  },
+  "discord": {
+    "logChannel": "0",
+    "suppressChannel": "0"
+  },
+  "emojis": {
+    "success": "<:emoji:0>",
+    "warning": "<:emoji:0>",
+    "failure": "<:emoji:0>"
+  }
+}

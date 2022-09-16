@@ -2,10 +2,6 @@ name: ESLint Validation
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
   workflow_dispatch:
 
 jobs:
@@ -14,6 +10,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
 
       - name: Install dependencies
         run: npm install

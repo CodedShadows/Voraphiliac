@@ -5,7 +5,7 @@ const { Routes, InteractionType, ComponentType } = require("discord-api-types/v1
 const { interactionEmbed, toConsole } = require("./functions.js");
 const config = require("./configs/config.json");
 const responses = require("./configs/responses.json");
-const rest = new REST({ version: 10 }).setToken(config.bot.token);
+const rest = new REST({ version: 10 }).setToken(process.env.token);
 const fs = require("node:fs");
 const wait = require("node:util").promisify(setTimeout);
 const warnedGuilds = [];
@@ -14,7 +14,8 @@ let ready = false,
 
 //#region Setup
 // Database
-const sequelize = new Sequelize(config.mysql.database, config.mysql.user, config.mysql.password, {
+const sequelize = new Sequelize(process.env.DBname, process.env.DBuser, process.env.DBpassword, {
+  host: process.env.DBhost,
   dialect: "mysql",
   logging: process.env.environment === "development" ? console.log : false,
 });
@@ -265,7 +266,7 @@ client.on("interactionCreate", async (interaction) => {
 });
 //#endregion
 
-client.login(config.bot.token);
+client.login(process.env.token);
 
 //#region Error handling
 process.on("uncaughtException", (err, origin) => {

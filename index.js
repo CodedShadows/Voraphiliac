@@ -219,7 +219,7 @@ client.on("interactionCreate", async (interaction) => {
     if(interaction.user.id !== preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
     if((await interaction.guild.members.fetch(predDiscord).catch(() => { return null; })) === null) {
       if(prey.discordId !== preyDiscord) return; // User deleted character
-      await client.models.Digestion.update({ status: "Free" }, { where: { status: "Voring", prey: prey.cId } });
+      await client.models.Digestion.destroy({ where: { status: "Voring", prey: prey.cId } });
       return interaction.editReply({ content: "*For some reason, you notice that your predator is gone. They must've left the server.*", components: [] });
     }
     if(answer === "yes") {

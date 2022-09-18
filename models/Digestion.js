@@ -10,7 +10,7 @@ module.exports.import = (sequelize) => sequelize.define("Digestion", {
     type: DataTypes.TEXT("tiny"),
     allowNull: false,
     validation: {
-      is: /(Voring)|(Vored)|(Digesting)|(Digested)|(Free)/
+      is: /(Voring|Vored|Digesting|Digested|Reformed|Escaped)/
     }
   },
   type: {

@@ -6,11 +6,13 @@ on:
 
 jobs:
   build:
-    runs-on: RUNNERNAME
+    runs-on: mainserver-pez
     env:
       token: ${{ secrets.TOKEN }}
-      DBpassword: ${{ secrets.DBPASSWORD }}
-      DBrootPassword: ${{ secrets.DBROOTPASSWORD }}
+      DBusername: ${{ secrets.DB_USERNAME }}
+      DBname: ${{ secrets.DB_NAME }}
+      DBpassword: ${{ secrets.DB_PASSWORD }}
+      DBrootPassword: ${{ secrets.DB_ROOTPASSWORD }}
       DBextPort: ${{ secrets.DBEXTPORT }}
 
     steps:

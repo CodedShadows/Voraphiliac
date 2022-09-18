@@ -134,7 +134,7 @@ module.exports = {
     const row = new ActionRow();
     row.addComponents(buttons);
     // Send a follow-up message with the buttons and await a response
-    const message = await interaction.followUp({ content: content, components: [row] });
+    const message = await interaction.followUp({ content, components: [row] });
     const res = await message
       .awaitMessageComponent({ filter, componentType: ComponentType.Button, time: time, errors: ["time"] })
       .catch(() => { return null; });
@@ -146,7 +146,7 @@ module.exports = {
     setTimeout(() => {
       if(message !== undefined && remove && res !== null) message.delete();
     }, 1500);
-    await message.edit({ content: content, components: [] });
+    await message.edit({ content, components: [] });
     return res;
   },
   /**
@@ -183,7 +183,7 @@ module.exports = {
     row.addComponents(menu);
 
     // Step 3: Execution
-    const message = await interaction.followUp({ content: content, components: [row] });
+    const message = await interaction.followUp({ content, components: [row] });
     const res = await message
       .awaitMessageComponent({ filter, componentType: ComponentType.SelectMenu, time: time, errors: ["time"] })
       .catch(() => { return null; });
@@ -197,7 +197,7 @@ module.exports = {
     setTimeout(() => {
       if(message !== undefined && remove && res !== null) message.delete();
     }, 1500);
-    await message.edit({ content: content, components: [] });
+    await message.edit({ content, components: [] });
     return res;
   },
   /**

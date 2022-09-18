@@ -281,7 +281,7 @@ module.exports = {
         currentPrey.push(prey);
       }
       await Promise.all(currentPrey);
-      currentPrey.map(p => { return {name: p.name, status: p.status}; });
+      currentPrey.map(p => new Object({ name: p.name, status: p.status }));
       let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.predator !== character.cId);
       if(currentPred.length > 0)
         currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });

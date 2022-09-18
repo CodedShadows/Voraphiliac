@@ -53,5 +53,24 @@ module.exports.import = (sequelize) => sequelize.define("Stats", {
       min: -1,
       max: 50
     }
+  },
+
+  // -- //
+
+  acids: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validation: {
+      min: 0,
+      max: 10
+    }
+  },
+  strength: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validation: {
+      min: 0,
+      max: 100
+    }
   }
 });

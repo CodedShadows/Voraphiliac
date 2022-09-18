@@ -1,0 +1,26 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: RUNNERNAME
+    env:
+      token: ${{ secrets.TOKEN }}
+      DBpassword: ${{ secrets.DBPASSWORD }}
+      DBrootPassword: ${{ secrets.DBROOTPASSWORD }}
+      DBextPort: ${{ secrets.DBEXTPORT }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update 3rd party docker containers
+        run: docker-compose pull
+
+      - name: Build app
+        run: docker-compose build
+
+      - name: Spin up containers
+        run: docker-compose up -d

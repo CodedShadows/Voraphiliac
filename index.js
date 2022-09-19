@@ -3,21 +3,24 @@ const { REST } = require("@discordjs/rest");
 const { Sequelize, Op } = require("sequelize");
 const { Routes, InteractionType, ComponentType } = require("discord-api-types/v10");
 const { interactionEmbed, toConsole } = require("./functions.js");
-const config = require("./configs/config.json");
-const responses = require("./configs/responses.json");
-const rest = new REST({ version: 10 }).setToken(process.env.token);
 const fs = require("node:fs");
 const wait = require("node:util").promisify(setTimeout);
+const rest = new REST({ version: 10 }).setToken(process.env.token);
 const warnedGuilds = [];
+const path = require("node:path");
 let ready = false,
   clientReady = false;
+if(!process.env.configdir || !fs.existsSync(process.env.configdir))
+  process.env.configdir = __dirname;
+const config = require(path.join(process.env.configdir, "config.json"));
+const responses = require(path.join(process.env.configdir, "responses.json"));
 
 //#region Setup
 // Database
 const sequelize = new Sequelize(process.env.DBname, process.env.DBuser, process.env.DBpassword, {
   host: process.env.DBhost,
   dialect: "mysql",
-  logging: {},
+  logging: false
 });
 if(!fs.existsSync("./models")) {
   fs.mkdirSync("./models");
@@ -246,8 +249,10 @@ process.on("uncaughtException", (err, origin) => {
   toConsole(`An [uncaughtException] has occurred.\n\n> ${err}\n> ${origin}`, new Error().stack, client);
 });
 process.on("unhandledRejection", async (promise) => {
-  if(!ready)
+  if(!ready) {
+    fs.writeFileSync("./latest-error.log", JSON.stringify({promise: JSON.stringify(promise), time: new Date().toString()}, null, 2));
     return process.exit(15);
+  }
   if(process.env.environment === "development") return {};
   const suppressChannel = await client.channels.fetch(config.discord.suppressChannel).catch(() => { return undefined; });
   if(!suppressChannel) return {};

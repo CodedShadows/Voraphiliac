@@ -1,8 +1,9 @@
 // eslint-disable-next-line no-unused-vars
 const { SlashCommandBuilder, Client, CommandInteraction, CommandInteractionOptionResolver, ComponentType, ModalBuilder, ActionRowBuilder, SelectMenuBuilder, SelectMenuOptionBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, parseEmoji } = require("discord.js");
-const { emojis } = require("../configs/config.json");
+const path = require("node:path");
+const { emojis } = require(path.join(process.env.configdir, "config.json"));
+const { new_profile_1, edit_image } = require(path.join(process.env.configdir, "modals.js"));
 const { profileModals, awaitButtons, toConsole, uppercaseFirst } = require("../functions.js");
-const { new_profile_1, edit_image } = require("../configs/modals.js");
 const { default: fetch } = require("node-fetch");
 const { Op } = require("sequelize");
 

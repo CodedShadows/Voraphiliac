@@ -1,6 +1,6 @@
 {
-  "⚠": "rename to 'responses.json' and populate with content",
+  "⚠": "Remove the 'dist.' at the beginning of this file, renaming it to 'responses.json' and remove this line!",
   "typeOfVore": [
-    "{{pred}} {{prey}}"
+    "Use {{pred}} and {{prey}} to represent character names"
   ]
 }

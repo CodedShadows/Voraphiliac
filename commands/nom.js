@@ -1,7 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, CommandInteraction, CommandInteractionOptionResolver, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { Op } = require("sequelize");
-const { emojis } = require("../configs/config.json");
+const path = require("node:path");
+const { emojis } = require(path.join(process.env.configdir, "config.json"));
 const { toConsole } = require("../functions.js");
 
 module.exports = {

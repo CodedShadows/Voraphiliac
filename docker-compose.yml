@@ -10,3 +10,4 @@ services:
       DBname:
       DBuser:
       DBpassword:
+      configdir:

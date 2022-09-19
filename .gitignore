@@ -3,3 +3,4 @@
 /configs/*.json
 !dist.*
 .env
+latest-error.log

@@ -1,5 +1,5 @@
 {
-  "⚠": "rename to 'config.json' and populate with content",
+  "⚠": "Remove the 'dist.' at the beginning of this file, renaming it to 'config.json' and remove this line!",
   "bot": {
     "applicationId": "0",
     "guildId": "0"

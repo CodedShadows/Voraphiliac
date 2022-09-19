@@ -13,6 +13,7 @@ jobs:
       DBname: ${{ secrets.DB_NAME }}
       DBpassword: ${{ secrets.DB_PASSWORD }}
       DBrootPassword: ${{ secrets.DB_ROOTPASSWORD }}
+      configdir: ${{ secrets.CONFIGDIR }}
 
     steps:
       - uses: actions/checkout@v3

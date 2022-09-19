@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, EmbedBuilder, Interaction, ActionRow, ButtonComponent, SelectMenuComponent, SelectMenuInteraction, SelectMenuOptionBuilder, ComponentType, TextInputBuilder, TextInputStyle, TextInputComponent } = require("discord.js");
-const config = require("./configs/config.json");
+const path = require("node:path");
+const config = require(path.join(process.env.configdir, "config.json"));
 
 const errors = {
   "[ERR-SQL]": "An error has occurred while trying to execute a database query",

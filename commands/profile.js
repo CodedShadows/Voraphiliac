@@ -497,7 +497,7 @@ module.exports = {
       let page = 0;
       const row = new ActionRowBuilder().setComponents(
         new ButtonBuilder({ customId: "previous", label: "◀️", style: ButtonStyle.Primary }),
-        new ButtonBuilder({ customId: "cancel", label: "Cancel", style: ButtonStyle.Danger }),
+        new ButtonBuilder({ customId: "cancel", label: "🟥", style: ButtonStyle.Danger }),
         new ButtonBuilder({ customId: "next", label: "▶️", style: ButtonStyle.Primary }),
       );
       interaction.editReply({ embeds: [embeds[page]], components: [row] });

@@ -4,10 +4,29 @@ services:
     build:
       context: ./
     restart: always
+    volumes:
+      - ${configfile}:/usr/src/app/configs/config.json
+      - ${responsesfile}:/usr/src/app/configs/responses.json
     environment:
-      token:
-      DBhost:
-      DBname:
-      DBuser:
+      DBhost: db
+      DBname: voraphiliac
+      DBuser: voraphiliac
       DBpassword:
-      configdir:
+      token:
+
+  db:
+    image: mariadb:latest
+    restart: always
+    # exposed for now, will be closed after setup
+    ports:
+      - "${DBextPort}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DBrootPassword}
+      MYSQL_DATABASE: voraphiliac
+      MYSQL_USER: voraphiliac
+      MYSQL_PASSWORD: ${DBpassword}
+
+volumes:
+  db_data:

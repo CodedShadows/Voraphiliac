@@ -9,11 +9,11 @@ jobs:
     runs-on: mainserver-pez
     env:
       token: ${{ secrets.TOKEN }}
-      DBusername: ${{ secrets.DB_USERNAME }}
-      DBname: ${{ secrets.DB_NAME }}
       DBpassword: ${{ secrets.DB_PASSWORD }}
       DBrootPassword: ${{ secrets.DB_ROOTPASSWORD }}
-      configdir: ${{ secrets.CONFIGDIR }}
+      DBextPort: ${{ secrets.DB_EXTPORT }}
+      configfile: ${{ secrets.CONFIGFILE }}
+      responsesfile: ${{ secrets.RESPONSESFILE }}
 
     steps:
       - uses: actions/checkout@v3

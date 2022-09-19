@@ -205,25 +205,23 @@ module.exports = {
             new SelectMenuOptionBuilder({ value: "unbirthPrey", label: "Unbirth Prey", description: "Image of your character when they are unbirth" })
           )
         );
-        let message = await interaction.editReply({ content: "What image would you like to update?", components: [row] });
-        const option = await message
+        const imageMessage = await interaction.editReply({ content: "What image would you like to update?", components: [row] });
+        const imageOption = await imageMessage
           .awaitMessageComponent({ filter, componentType: ComponentType.SelectMenu, type: 15_000 })
           .catch(() => { return undefined; });
         
-        if(!option) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
+        if(!imageOption) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         const modal = edit_image;
-        modal.components[0].components[0].setCustomId(option.values[0]);
-        option.showModal(modal);
-        const url = await option.awaitModalSubmit({ filter, time: 30_000 })
+        modal.components[0].components[0].setCustomId(imageOption.values[0]);
+        imageOption.showModal(modal);
+        const url = await imageOption.awaitModalSubmit({ filter, time: 30_000 })
           .catch(() => { return undefined; });
 
         if(!url) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         await url.reply({ content: `${emojis.failure} | Please close this message and pay attention to the above one!`, ephemeral: true });
         await interaction.editReply({ content: `${emojis.warning} | Processing...`, components: [] });
-        if(!option) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         const image = url.fields.fields.first();
         const regex = /^https:\/\/.+\.[a-zA-Z0-9]+(\/.+)+[a-zA-Z0-9]\.(png|jpg)$/i;
-        const character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
         if(!regex.test(image.value)) return interaction.editReply({ content: `${emojis.failure} | You must enter a URL that starts with https and ends with .png or .jpg` });
 
         const test = await fetch(image.value)
@@ -496,12 +494,12 @@ module.exports = {
         })
       ];
       let page = 0;
-      const row = new ActionRowBuilder().setComponents(
+      const paginationRow = new ActionRowBuilder().setComponents(
         new ButtonBuilder({ customId: "previous", label: "◀️", style: ButtonStyle.Primary }),
         new ButtonBuilder({ customId: "cancel", label: "🟥", style: ButtonStyle.Danger }),
         new ButtonBuilder({ customId: "next", label: "▶️", style: ButtonStyle.Primary }),
       );
-      interaction.editReply({ embeds: [embeds[page]], components: [row] });
+      interaction.editReply({ embeds: [embeds[page]], components: [paginationRow] });
       const coll = await interaction.fetchReply()
         .then(r => r.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 120_000 }));
       

@@ -64,12 +64,11 @@ module.exports = {
         await client.models.Digestion.update({ status: "Free" }, { where: { prey: digestion.prey } });
         await client.models.Stats.update({ acids: 0, strength: 0 }, { where: { character: digestion.pred } });
         return interaction.editReply({ content: "*You struggle as hard as you can and for a second, you feel freedom. However, alas, it was not meant to be and you slipped back inside. However this time, you were determined. You kept pushing on and eventually, you found your way outside of your predator!* (`+Defiance`)" });
-      } else {
-        await client.models.Stats.update({
-          strength: digestion.strength + 5 > 100 ? 100 : digestion.strength + 5
-        }, { where: { character: digestion.predator } });
-        return interaction.editReply({ content: "*You try your best to struggle but in the end, your efforts were fruitless and you stayed inside your predator. Your home shook for a second and you pressed against it. It felt stronger...* (`+Predator Strength`)" });
       }
+      await client.models.Stats.update({
+        strength: digestion.strength + 5 > 100 ? 100 : digestion.strength + 5
+      }, { where: { character: digestion.predator } });
+      return interaction.editReply({ content: "*You try your best to struggle but in the end, your efforts were fruitless and you stayed inside your predator. Your home shook for a second and you pressed against it. It felt stronger...* (`+Predator Strength`)" });
     }
     case "Move Around": {
       const flip = Math.floor(Math.random() * 2);
@@ -78,12 +77,11 @@ module.exports = {
           strength: digestion.strength + 2 > 100 ? 100 : digestion.strength + 2
         }, { where: { character: digestion.predator } });
         return interaction.editReply({ content: "*You decide to move around your new home inside your predator. Unfortunately, this doesn't make your predator that happy.* (`+Predator Strength`)" });
-      } else {
-        await client.models.Stats.update({
-          strength: digestion.strength - 2 < 0 ? 0 : digestion.strength - 2
-        }, { where: { character: digestion.predator } });
-        return interaction.editReply({ content: "*You move around your while inside your predator, curious about what you can do. Luckily, you manage to rub them right and they relax a little.* (`-Predator Strength`)" });
       }
+      await client.models.Stats.update({
+        strength: digestion.strength - 2 < 0 ? 0 : digestion.strength - 2
+      }, { where: { character: digestion.predator } });
+      return interaction.editReply({ content: "*You move around your while inside your predator, curious about what you can do. Luckily, you manage to rub them right and they relax a little.* (`-Predator Strength`)" });
     }
     case "Pleasure": {
       const pValue = Math.ceil(Math.random() * 100);
@@ -92,15 +90,17 @@ module.exports = {
           arousal: predStats.arousal + 5
         }, { where: { character: digestion.pred } });
         return interaction.editReply({ content: "*You move around inside your predator, finding a sensitive spot. You use all of your body to push against it, rubbing, licking, and doing anything you can to please that one point. A sound of pleasure comes out of your predator, and you feel like something changed inside.* (`+Predator Arousal`)" });
-      } else {
-        if(pValue < 25) {
-          await client.models.Stats.update({
-            arousal: predStats.arousal + 3
-          }, { where: { character: digestion.pred } });
-          return interaction.editReply({ content: "*Trying to find a special spot inside your predator is hard. Once you've found it, you try your hardest to please it. After some energy spent on pleasing them, you notice that something changed a bit...* (`+Predator Arousal`)" });
-        } else
-          return interaction.editReply({ content: "*You try your best to find a place to please your predator. However, you were unable to find one. You feel a bit tired but could probably continue.*" });
       }
+      if(pValue < 25) {
+        await client.models.Stats.update({
+          arousal: predStats.arousal + 3
+        }, { where: { character: digestion.pred } });
+        return interaction.editReply({ content: "*Trying to find a special spot inside your predator is hard. Once you've found it, you try your hardest to please it. After some energy spent on pleasing them, you notice that something changed a bit...* (`+Predator Arousal`)" });
+      }
+      return interaction.editReply({ content: "*You try your best to find a place to please your predator. However, you were unable to find one. You feel a bit tired but could probably continue.*" });
+    }
+    default: {
+      return interaction.editReply({ content: `${emojis.failure} | Something went terribly wrong and you shouldn't be seeing this! Please report this to a developer!` });
     }
     }
   }

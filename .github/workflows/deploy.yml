@@ -12,6 +12,8 @@ jobs:
       DBpassword: ${{ secrets.DB_PASSWORD }}
       DBrootPassword: ${{ secrets.DB_ROOTPASSWORD }}
       DBextPort: ${{ secrets.DB_EXTPORT }}
+      configfile: ${{ secrets.CONFIGFILE }}
+      responsesfile: ${{ secrets.RESPONSESFILE }}
 
     steps:
       - uses: actions/checkout@v3

@@ -17,7 +17,8 @@ let ready = false,
 const sequelize = new Sequelize(process.env.DBname, process.env.DBuser, process.env.DBpassword, {
   host: process.env.DBhost,
   dialect: "mysql",
-  logging: process.env.environment ? console.debug() : false,
+  // skipcq JS-0002
+  logging: process.env.environment === "development" ? console.debug() : false,
 });
 if(!fs.existsSync("./models")) {
   fs.mkdirSync("./models");

@@ -42,7 +42,7 @@ module.exports = {
       color: 0xDE2821,
       description: `${message ?? "No message. Please check the source for errors!"}`,
       footer: {
-        text: `Source: ${source} @ ${new Date().toLocaleTimeString()} ${/GMT([+-]\d{2})(\d{2})/.exec(new Date().toString())[0]}`
+        text: `Source: ${source} @ ${new Date().toLocaleTimeString()} ${/GMT([+-]\d{2})(\d{2})/.exec(new Date().toString())[0]}` // skipcq: JS-D007
       },
       timestamp: new Date()
     }] })
@@ -65,7 +65,7 @@ module.exports = {
    * @returns {null} 
    */
   async interactionEmbed(type, content, expected, interaction, client, remove) {
-    if(!type || typeof content !== "string" || expected === undefined || !interaction || !client || !remove || remove.length !== 2) throw new SyntaxError(`One or more of the required parameters are missing in [interactionEmbed]\n\n> ${type}\n> ${content}\n> ${expected}\n> ${interaction}\n> ${client}`);
+    if(!type || typeof content !== "string" || typeof expected === "undefined" || !interaction || !client || !remove || remove.length !== 2) throw new SyntaxError(`One or more of the required parameters are missing in [interactionEmbed]\n\n> ${type}\n> ${content}\n> ${expected}\n> ${interaction}\n> ${client}`);
     if(!interaction.deferred) await interaction.deferReply();
     const embed = new EmbedBuilder();
 
@@ -209,8 +209,9 @@ module.exports = {
     let duration = 0;
     if(!/[1-9]{1,3}[dhms]/g.test(time)) return "NaN";
 
+    // skipcq: JS-D007
     for(const period of /[1-9]{1,3}[dhms]/g.exec(time)) {
-      const [amount, unit] = /^(\d+)([dhms])$/.exec(period).slice(1);
+      const [amount, unit] = /^(\d+)([dhms])$/.exec(period).slice(1); // skipcq: JS-D007
       duration += unit === "d" ? amount * 24 * 60 * 60 : unit === "h" ? amount * 60 * 60 : unit === "m" ? amount * 60 : amount;
     }
 

@@ -216,7 +216,7 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.deferUpdate();
     const [type, answer] = interaction.customId.split("_");
     const regex = /\*Psst!\* ((?<preyName>.+) \(<@(?<preyDiscord>[0-9]{18,})>\)), .+ by ((?<predName>.+) \(<@(?<predDiscord>[0-9]{18,})>\))/;
-    const { predName, predDiscord, preyName, preyDiscord } = regex.exec(interaction.message.content).groups;
+    const { predName, predDiscord, preyName, preyDiscord } = regex.exec(interaction.message.content).groups; // skipcq: JS-D007
     const prey = await client.models.Character.findOne({ where: { name: preyName } });
     if(interaction.user.id !== preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
     if((await interaction.guild.members.fetch(predDiscord).catch(() => { return null; })) === null) {

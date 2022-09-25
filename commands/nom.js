@@ -1,4 +1,3 @@
-// skipcq: JS-0044
 // eslint-disable-next-line no-unused-vars
 const { Client, CommandInteraction, CommandInteractionOptionResolver, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { Op } = require("sequelize");
@@ -52,6 +51,7 @@ module.exports = {
    * @param {CommandInteraction} interaction
    * @param {CommandInteractionOptionResolver} options
    */
+  // skipcq: JS-0044
   run: async (client, interaction, options) => {
     await interaction.deferReply();
     let type = options.getString("type") || "oral";

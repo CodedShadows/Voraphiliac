@@ -29,7 +29,7 @@ module.exports = {
     }
     case "role": {
       if(!/^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i.test(data.value)) return interactionEmbed(3, "[ERR-ARGS]", "Please enter a valid vore role. Pred can be substituted for Predator. (`Apex Pred`, `Pred`, `Pred Switch`, `Switch`, `Prey Switch`, or `Prey`)", interaction, client, [true, 10]);
-      const cleanContent = /^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i.exec(data.value)[0].toLowerCase();
+      const cleanContent = /^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i.exec(data.value)[0].toLowerCase(); // skipcq: JS-D007
       try {
         await client.models.Character.update({ role: cleanContent }, { where: { cId: char.cId } });
         return interaction.message.edit({ content: `${emojis.success} | Updated your character's role to \`${cleanContent.split(" ").map(v => v.charAt(0).toUpperCase()+v.slice(1)).join(" ")}\``, components: [] });

@@ -46,12 +46,12 @@ module.exports = {
           active: false,
           busy: false,
           name: fields.getTextInputValue("name"),
-          role: /^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i.exec(fields.getTextInputValue("role").toLowerCase())[0],
+          role: /^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$/i.exec(fields.getTextInputValue("role").toLowerCase())[0], // skipcq: JS-D007
           description: m2.fields.getTextInputValue("description"),
           gender: fields.getTextInputValue("gender").toLowerCase(),
           species: fields.getTextInputValue("species").toLowerCase(),
-          weight: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("weight"))[0],
-          height: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("height"))[0],
+          weight: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("weight"))[0], // skipcq: JS-D007
+          height: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("height"))[0], // skipcq: JS-D007
           whitelist: ["all"],
           blacklist: ["none"],
           autodigest: false

@@ -1,4 +1,3 @@
-// skipcq: JS-0044, JS-D007
 // eslint-disable-next-line no-unused-vars
 const { SlashCommandBuilder, Client, CommandInteraction, CommandInteractionOptionResolver, ComponentType, ModalBuilder, ActionRowBuilder, SelectMenuBuilder, SelectMenuOptionBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, parseEmoji } = require("discord.js");
 const { emojis } = require("../configs/config.json");
@@ -75,6 +74,7 @@ module.exports = {
    * @param {CommandInteraction} interaction
    * @param {CommandInteractionOptionResolver} options
    */
+  // skipcq: JS-0044
   run: async (client, interaction, options) => {
     const row = new ActionRowBuilder();
     let subcommand = options.getSubcommand();

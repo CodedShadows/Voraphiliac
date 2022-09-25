@@ -6,7 +6,7 @@ on:
 
 jobs:
   validate:
-    runs-on: mainserver-roger
+    runs-on: linux
 
     steps:
       - uses: actions/checkout@v3

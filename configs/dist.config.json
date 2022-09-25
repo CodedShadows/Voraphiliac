@@ -2,7 +2,14 @@
   "⚠": "Remove the 'dist.' at the beginning of this file, renaming it to 'config.json' and remove this line!",
   "bot": {
     "applicationId": "0",
-    "guildId": "0"
+    "guildId": "0",
+    "token": "token"
+  },
+  "database": {
+    "host": "host",
+    "username": "username",
+    "password": "password",
+    "database": "database"
   },
   "discord": {
     "logChannel": "0",

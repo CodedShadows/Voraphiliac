@@ -1,6 +1,4 @@
 /node_modules
 /.vscode
 /configs/*.json
-!dist.*
-.env
 latest-error.log

@@ -27,27 +27,20 @@ npm start
 
 ### Startup Requirements
 You MUST set the `configs/config.json`, `configs/responses.json` and `.env` files up before running, otherwise you might encounter some bugs! Make sure to remove `dist.` from the existing files.
-> `.env`
-
-```env
-# Production
-environment=production
-token=tokenHere
-DBhost=localhost
-DBname=voraphiliac
-DBuser=voraphiliac
-DBpassword=passwordHere
-DBrootPassword=passwordHere
-configdir=/path/to/valid/config/dir/goes/here
-```
-
 > `configs/config.json`
 
 ```json
 {
   "bot": {
     "applicationId": "0",
-    "guildId": "0"
+    "guildId": "0",
+    "token": "token"
+  },
+  "database": {
+    "host": "host",
+    "username": "username",
+    "password": "password",
+    "database": "database"
   },
   "discord": {
     "logChannel": "0",

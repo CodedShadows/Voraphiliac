@@ -1,13 +1,12 @@
-// skipcq: JS-D007
 const { Client, Collection, IntentsBitField, Partials } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Sequelize, Op } = require("sequelize");
 const { Routes, InteractionType, ComponentType, ActivityType } = require("discord-api-types/v10");
 const { interactionEmbed, toConsole } = require("./functions.js");
-const config = require("./configs/config.json");
+const { bot, database, discord } = require("./configs/config.json");
+const fs = require("node:fs");
 const responses = require("./configs/responses.json");
 const rest = new REST({ version: 10 }).setToken(process.env.token);
-const fs = require("node:fs");
 const wait = require("node:util").promisify(setTimeout);
 const warnedGuilds = [];
 let ready = false,
@@ -15,11 +14,11 @@ let ready = false,
 
 //#region Setup
 // Database
-const sequelize = new Sequelize(process.env.DBname, process.env.DBuser, process.env.DBpassword, {
+const sequelize = new Sequelize(database.database, database.username, database.password, {
   host: process.env.DBhost,
   dialect: "mysql",
   // skipcq: JS-0002
-  logging: process.env.environment === "development" ? console.debug() : false,
+  logging: process.env.environment === "development" ? console.debug : false,
 });
 if(!fs.existsSync("./models")) {
   fs.mkdirSync("./models");
@@ -84,30 +83,30 @@ client.models = sequelize.models;
     // Refresh based on environment
     if(process.env.environment === "development") {
       await rest.get(
-        Routes.applicationCommands(config.bot.applicationId)
+        Routes.applicationCommands(bot.applicationId)
       )
         .then(cmds => cmds.forEach((command) => {
           rest.delete(
-            Routes.applicationCommand(config.bot.applicationId, command.id)
+            Routes.applicationCommand(bot.applicationId, command.id)
           );
         }));
 
       await rest.put(
-        Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId),
+        Routes.applicationGuildCommands(bot.applicationId, bot.guildId),
         { body: slashCommands }
       );
     } else {
       await rest.get(
-        Routes.applicationGuildCommands(config.bot.applicationId, config.bot.guildId)
+        Routes.applicationGuildCommands(bot.applicationId, bot.guildId)
       )
         .then(cmds => cmds.forEach((command) => {
           rest.delete(
-            Routes.applicationGuildCommand(config.bot.applicationId, config.bot.guildId, command.id)
+            Routes.applicationGuildCommand(bot.applicationId, bot.guildId, command.id)
           );
         }));
       
       await rest.put(
-        Routes.applicationCommands(config.bot.applicationId),
+        Routes.applicationCommands(bot.applicationId),
         { body: slashCommands }
       );
     }
@@ -131,7 +130,7 @@ client.on("ready", async () => {
 
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: process.env.environment === "development-" });
+    await sequelize.sync({ alter: process.env.environment === "development" });
     toConsole("Database loaded and ready!", new Error().stack, client);
   } catch(e) {
     console.warn("[DB] Failed validation");
@@ -255,7 +254,7 @@ process.on("unhandledRejection", async (promise) => {
     return process.exit(15);
   }
   if(process.env.environment === "development") return {};
-  const suppressChannel = await client.channels.fetch(config.discord.suppressChannel).catch(() => { return false; });
+  const suppressChannel = await client.channels.fetch(discord.suppressChannel).catch(() => { return false; });
   if(!suppressChannel) return {};
   if(String(promise).includes("Interaction has already been acknowledged.") || String(promise).includes("Unknown interaction") || String(promise).includes("Unknown Message")) return suppressChannel.send(`A suppressed error has occured at process.on(unhandledRejection):\n>>> ${promise}`);
   toConsole(`An [unhandledRejection] has occurred.\n\n> ${promise}`, new Error().stack, client);

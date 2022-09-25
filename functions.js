@@ -1,7 +1,6 @@
-// skipcq: JS-D007
 // eslint-disable-next-line no-unused-vars
 const { Client, EmbedBuilder, Interaction, ActionRow, ButtonComponent, SelectMenuComponent, SelectMenuInteraction, SelectMenuOptionBuilder, ComponentType, TextInputBuilder, TextInputStyle, TextInputComponent } = require("discord.js");
-const config = require("./configs/config.json");
+const { discord } = require("./configs/config.json");
 
 const errors = {
   "[ERR-SQL]": "An error has occurred while trying to execute a database query",
@@ -28,7 +27,7 @@ module.exports = {
    */
   async toConsole(message, source, client) {
     if(!message || !source || !client) return {};
-    const channel = await client.channels.cache.get(config.discord.logChannel);
+    const channel = await client.channels.cache.get(discord.logChannel);
     if(source.split("\n").length < 2) return {};
     source = source.split("\n")[1].trim().replace("at ", "").replaceAll("\\", "/");
     if(/^.+ \(.+\)/.test(source)) source = source.split("(")[1];

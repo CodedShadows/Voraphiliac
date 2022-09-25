@@ -1,4 +1,3 @@
-// skipcq: JS-D007
 // eslint-disable-next-line no-unused-vars
 const { Client, ModalSubmitInteraction, ModalSubmitFields, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require("discord.js");
 const { emojis } = require("../configs/config.json");

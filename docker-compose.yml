@@ -13,6 +13,7 @@ services:
       DBuser: voraphiliac
       DBpassword:
       token:
+      environment:
 
   db:
     image: mariadb:latest

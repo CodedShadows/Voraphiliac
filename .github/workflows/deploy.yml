@@ -14,6 +14,7 @@ jobs:
       DBextPort: ${{ secrets.DB_EXTPORT }}
       configfile: ${{ secrets.CONFIGFILE }}
       responsesfile: ${{ secrets.RESPONSESFILE }}
+      environment: ${{ secrets.ENVIRONMENT }}
 
     steps:
       - uses: actions/checkout@v3

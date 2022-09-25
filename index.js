@@ -1,7 +1,7 @@
 const { Client, Collection, IntentsBitField, Partials } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Sequelize, Op } = require("sequelize");
-const { Routes, InteractionType, ComponentType } = require("discord-api-types/v10");
+const { Routes, InteractionType, ComponentType, ActivityType } = require("discord-api-types/v10");
 const { interactionEmbed, toConsole } = require("./functions.js");
 const config = require("./configs/config.json");
 const responses = require("./configs/responses.json");
@@ -123,15 +123,15 @@ client.models = sequelize.models;
 
 //#region Events
 client.on("ready", async () => {
-  toConsole(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at <t:${Math.floor(Date.now()/1000)}:T>. Client ${ready ? "can" : "**cannot**"} receive commands!`, new Error().stack, client);
   clientReady = true;
-  // Set the status to new Date();
+  toConsole(`[READY] Logged in as ${client.user.tag} (${client.user.id}) at <t:${Math.floor(Date.now()/1000)}:T>. Client ${ready ? "can" : "**cannot**"} receive commands!`, new Error().stack, client);
   client.guilds.cache.each(g => g.members.fetch());
-  client.user.setActivity(`${client.users.cache.size} users across ${client.guilds.cache.size} servers`, { type: "LISTENING" });
+  client.user.setActivity({ name: `${client.users.cache.size} predators and prey across ${client.guilds.cache.size} servers`, type: ActivityType.Watching });
 
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: process.env.environment === "development" });
+    await sequelize.sync({ alter: process.env.environment === "development-" });
+    toConsole("Database loaded and ready!", new Error().stack, client);
   } catch(e) {
     console.warn("[DB] Failed validation");
     console.error(e);
@@ -140,7 +140,7 @@ client.on("ready", async () => {
 
   setInterval(() => {
     client.guilds.cache.each(g => g.members.fetch());
-    client.user.setActivity(`${client.users.cache.size} users across ${client.guilds.cache.size} servers`, { type: "LISTENING" });
+    client.user.setActivity({ name: `${client.users.cache.size} predators and prey across ${client.guilds.cache.size} servers`, type: ActivityType.Watching });
 
     // -- //
 
@@ -242,13 +242,15 @@ client.login(process.env.token);
 
 //#region Error handling
 process.on("uncaughtException", (err, origin) => {
-  if(!ready)
+  if(!ready) {
+    fs.writeFileSync("./latest-error.log", JSON.stringify({code: 14, promise: JSON.stringify(err), time: new Date().toString()}, null, 2));
     return process.exit(14);
+  }
   toConsole(`An [uncaughtException] has occurred.\n\n> ${err}\n> ${origin}`, new Error().stack, client);
 });
 process.on("unhandledRejection", async (promise) => {
   if(!ready) {
-    fs.writeFileSync("./latest-error.log", JSON.stringify({promise: JSON.stringify(promise), time: new Date().toString()}, null, 2));
+    fs.writeFileSync("./latest-error.log", JSON.stringify({code: 15, promise: JSON.stringify(promise), time: new Date().toString()}, null, 2));
     return process.exit(15);
   }
   if(process.env.environment === "development") return {};

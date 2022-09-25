@@ -68,10 +68,10 @@ module.exports = {
     const vDigestions_pred = digestions.filter(d => d.predator === victim.cId);
     const vDigestions_prey = digestions.filter(d => d.prey === victim.cId);
     // Check whitelist and blacklist
-    if(JSON.parse(character.blacklist).includes(type) || (!JSON.parse(character.whitelist).includes(type) && !JSON.parse(character.whitelist).includes("all")))
-      return interaction.editReply({ content: `${emojis.failure} | ${JSON.parse(character.blacklist).includes(type) ? "Your character's blacklist contains the vore you are trying to do" : "Your character's whitelist does not have the type of vore you are trying to do"}` });
-    if(JSON.parse(victim.blacklist).includes(type) || (!JSON.parse(victim.whitelist).includes(type) && !JSON.parse(victim.whitelist).includes("all")))
-      return interaction.editReply({ content: `${emojis.failure} | ${JSON.parse(victim.blacklist).includes(type) ? "Your victim's blacklist contains the vore you are trying to do" : "Your victim's whitelist does not have the type of vore you are trying to do"}` });
+    if(character.blacklist.includes(type) || (!character.whitelist.includes(type) && !character.whitelist.includes("all")))
+      return interaction.editReply({ content: `${emojis.failure} | ${character.blacklist.includes(type) ? "Your character's blacklist contains the vore you are trying to do" : "Your character's whitelist does not have the type of vore you are trying to do"}` });
+    if(victim.blacklist.includes(type) || (!victim.whitelist.includes(type) && !victim.whitelist.includes("all")))
+      return interaction.editReply({ content: `${emojis.failure} | ${victim.blacklist.includes(type) ? "Your victim's blacklist contains the vore you are trying to do" : "Your victim's whitelist does not have the type of vore you are trying to do"}` });
     // Check if either is busy
     if(cDigestions_pred.some(d => /(Voring|Digesting)/.test(d.status)))
       return interaction.editReply({ content: "*You feel something moving in you. Seems like you're a little bit preoccupied with your current prey. Try finishing with them before you vore someone new.*" });

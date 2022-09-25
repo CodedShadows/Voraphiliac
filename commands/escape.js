@@ -37,14 +37,15 @@ module.exports = {
    * @param {CommandInteractionOptionResolver} options
    */
   run: async (client, interaction, options) => {
+    await interaction.deferReply();
     const type = options.getString("type") ?? "Struggle";
     const character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
     if(!character) return interaction.editReply({ content: `${emojis.failure} | You don't have an active character!` });
     const digestion = await client.models.Digestion.findOne({ where: { prey: character.cId, status: {[Op.or]: ["Vored", "Digesting"]} } });
     if(!digestion)
       return interaction.editReply({ content: `${emojis.failure} | Oops, you're not inside a predator! Maybe try again later when you've found your way inside one` });
-    const stats = await client.models.Stat.findOne({ where: { character: {[Op.or]: [digestion.prey, digestion.predator]} } });
-    if(stats.length < 2) return interaction.editReply({ content: `${emojis.failure} | Something went wrong. Please verify your predator still exists (Run \`)` });
+    const stats = await client.models.Stats.findOne({ where: { character: {[Op.or]: [digestion.prey, digestion.predator]} } });
+    if(stats.length < 2) return interaction.editReply({ content: `${emojis.failure} | Something went wrong. Please verify your predator still exists (Run \`/profile list\` pn your predator)` });
     const predStats = stats.filter(s => s.character === digestion.predator);
     const preyStats = stats.filter(s => s.character === digestion.prey);
     switch(type) {

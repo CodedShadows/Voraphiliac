@@ -51,8 +51,8 @@ module.exports = {
           species: fields.getTextInputValue("species").toLowerCase(),
           weight: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("weight"))[0],
           height: /^[0-9]+(\.[0-9]{1,3})?$/.exec(m2.fields.getTextInputValue("height"))[0],
-          whitelist: JSON.stringify(["all"]),
-          blacklist: JSON.stringify(["none"]),
+          whitelist: ["all"],
+          blacklist: ["none"],
           autodigest: false
         });
         client.models.Stats.create({

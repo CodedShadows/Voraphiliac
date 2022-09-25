@@ -56,6 +56,13 @@ module.exports.import = (sequelize) => sequelize.define("Character", {
     allowNull: false,
     validation: {
       is: /\[.+,*\]/
+    },
+    set(value) {
+      if(!Array.isArray(value)) throw new Error(value + " is not an array");
+      return JSON.stringify(value);
+    },
+    get() {
+      return JSON.parse(this.getDataValue("whitelist"));
     }
   },
   blacklist: {
@@ -63,6 +70,13 @@ module.exports.import = (sequelize) => sequelize.define("Character", {
     allowNull: false,
     validation: {
       is: /\[.+,*\]/
+    },
+    set(value) {
+      if(!Array.isArray(value)) throw new Error(value + " is not an array");
+      return JSON.stringify(value);
+    },
+    get() {
+      return JSON.parse(this.getDataValue("blacklist"));
     }
   },
   autodigest: {

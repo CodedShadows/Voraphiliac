@@ -147,9 +147,9 @@ module.exports = {
         await whitelist.deleteReply();
         if(whitelist.values.includes("all")) whitelist.values = ["all"];
         if(whitelist.values.includes("none")) whitelist.values = ["none"];
-        if(whitelist.values[0] !== "none" && JSON.parse(character.blacklist)[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your blacklist to none before updating your whitelist!`, components: [] });
+        if(whitelist.values[0] !== "none" && character.blacklist[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your blacklist to none before updating your whitelist!`, components: [] });
         try {
-          await client.models.Character.update({ whitelist: JSON.stringify(whitelist.values) }, { where: { cId: character.cId } });
+          await client.models.Character.update({ whitelist: whitelist.values }, { where: { cId: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your whitelist!`, components: [] });
         } catch(e) {
           toConsole(String(e), new Error().stack, client);
@@ -178,9 +178,9 @@ module.exports = {
         await blacklist.deleteReply();
         if(blacklist.values.includes("all")) blacklist.values = ["all"];
         if(blacklist.values.includes("none")) blacklist.values = ["none"];
-        if(blacklist.values[0] !== "none" && JSON.parse(character.whitelist)[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your whitelist to none before updating your blacklist!`, components: [] });
+        if(blacklist.values[0] !== "none" && character.whitelist[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your whitelist to none before updating your blacklist!`, components: [] });
         try {
-          await client.models.Character.update({ blacklist: JSON.stringify(blacklist.values) }, { where: { cId: character.cId } });
+          await client.models.Character.update({ blacklist: blacklist.values }, { where: { cId: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your blacklist!`, components: [] });
         } catch(e) {
           toConsole(String(e), new Error().stack, client);
@@ -257,12 +257,12 @@ module.exports = {
       return interaction.editReply({ content: `${emojis.success} | Successfully switched to ${char.name}!` });
     } else if(subcommand === "view") {
       if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
-      const images = await client.models.Image.findOne({ where: { character: character.cId } });
-      const stats = await client.models.Stats.findOne({ where: { character: character.cId } });
+      const [images] = await client.models.Image.findOrCreate({ where: { character: character.cId }, defaults: { profile: " ", analPred: " ", analPrey: " ", breastPred: " ", breastPrey: " ", cockPred: " ", cockPrey: " ", oralPred: " ", oralPrey: " ", tailPred: " ", tailPrey: " ", unbirthPred: " ", unbirthPrey: " " } });
+      const [stats] = await client.models.Stats.findOrCreate({ where: { character: character.cId }, defaults: { health: 100, arousal: 0, digestion: 0, defiance: 0, euphoria: 0, resistance: 0, acids: 0, strength: 0 } });
       const mementos = await client.models.Memento.findAll({ where: { character: character.cId } });
       const items = await client.models.Item.findAll({ where: { owner: character.cId } });
       const digestions = await client.models.Digestion.findAll({ where: { [Op.or]: { prey: character.cId, predator: character.cId } } });
-      const currentPrey = [];
+      let currentPrey = [];
       for(let prey of digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey !== character.cId)) {
         let status = prey.status;
         switch(status) {
@@ -273,14 +273,14 @@ module.exports = {
           status = `who is being ${prey.type} vored`;
           break;
         case "Digesting":
-          status = `who was vored ${prey.type} vored but is digesting`;
+          status = `who was ${prey.type} vored but is digesting`;
           break;
         }
         prey = client.models.Character.findOne({ where: { cId: prey.prey } });
         currentPrey.push(prey);
       }
-      await Promise.all(currentPrey);
-      currentPrey.map(p => new Object({ name: p.name, status: p.status }));
+      currentPrey = await Promise.all(currentPrey)
+        .then(prey => prey.map(p => new Object({ name: p.name, status: digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey === p.cId)[0].status })));
       let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.predator !== character.cId);
       if(currentPred.length > 0)
         currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
@@ -330,12 +330,12 @@ module.exports = {
             },
             {
               name: "Whitelist",
-              value: JSON.parse(character.whitelist).map(v => uppercaseFirst(v)).join(", "),
+              value: character.whitelist.map(v => uppercaseFirst(v)).join(", "),
               inline: true
             },
             {
               name: "Blacklist",
-              value: JSON.parse(character.blacklist).map(v => uppercaseFirst(v)).join(", "),
+              value: character.blacklist.map(v => uppercaseFirst(v)).join(", "),
               inline: true
             }
           ],
@@ -500,19 +500,24 @@ module.exports = {
         new ButtonBuilder({ customId: "next", label: "▶️", style: ButtonStyle.Primary }),
       );
       interaction.editReply({ embeds: [embeds[page]], components: [paginationRow] });
-      const coll = await interaction.fetchReply()
-        .then(r => r.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 120_000 }));
+      const message = await interaction.fetchReply();
+      const coll = message.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 120_000 });
       
-      coll.on("collect", (i) => {
-        i.deferUpdate();
+      coll.on("collect", async (i) => {
         if(i.customId === "next") {
           page = page + 1;
           if(page > embeds.length - 1) page = 0;
-          interaction.editReply({ embeds: [embeds[page]], components: [row] });
+          console.info(page, embeds[page]);
+          // See https://github.com/discord/discord-api-docs/issues/5279
+          await message.edit({ content: "?", embeds: [embeds[page]], components: [row] });
+          await i.deferUpdate();
         } else if(i.customId === "previous") {
           page = page - 1;
           if(page < 0) page = embeds.length - 1;
-          interaction.editReply({ embeds: [embeds[page]], components: [row] });
+          console.info(page, embeds[page]);
+          // See https://github.com/discord/discord-api-docs/issues/5279
+          await message.edit({ content: "?", embeds: [embeds[page]], components: [row] });
+          await i.deferUpdate();
         } else {
           coll.stop();
         }

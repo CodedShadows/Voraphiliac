@@ -1,3 +1,4 @@
+// skipcq: JS-D007
 const { Client, Collection, IntentsBitField, Partials } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Sequelize, Op } = require("sequelize");
@@ -17,7 +18,7 @@ let ready = false,
 const sequelize = new Sequelize(process.env.DBname, process.env.DBuser, process.env.DBpassword, {
   host: process.env.DBhost,
   dialect: "mysql",
-  // skipcq JS-0002
+  // skipcq: JS-0002
   logging: process.env.environment === "development" ? console.debug() : false,
 });
 if(!fs.existsSync("./models")) {
@@ -254,7 +255,7 @@ process.on("unhandledRejection", async (promise) => {
     return process.exit(15);
   }
   if(process.env.environment === "development") return {};
-  const suppressChannel = await client.channels.fetch(config.discord.suppressChannel).catch(() => { return undefined; });
+  const suppressChannel = await client.channels.fetch(config.discord.suppressChannel).catch(() => { return false; });
   if(!suppressChannel) return {};
   if(String(promise).includes("Interaction has already been acknowledged.") || String(promise).includes("Unknown interaction") || String(promise).includes("Unknown Message")) return suppressChannel.send(`A suppressed error has occured at process.on(unhandledRejection):\n>>> ${promise}`);
   toConsole(`An [unhandledRejection] has occurred.\n\n> ${promise}`, new Error().stack, client);

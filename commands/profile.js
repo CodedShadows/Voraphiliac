@@ -1,4 +1,4 @@
-// skipcq JS-0044
+// skipcq: JS-0044, JS-D007
 // eslint-disable-next-line no-unused-vars
 const { SlashCommandBuilder, Client, CommandInteraction, CommandInteractionOptionResolver, ComponentType, ModalBuilder, ActionRowBuilder, SelectMenuBuilder, SelectMenuOptionBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, parseEmoji } = require("discord.js");
 const { emojis } = require("../configs/config.json");
@@ -83,7 +83,7 @@ module.exports = {
     const filter = (i) => i.user.id === interaction.user.id; 
 
     // Find details on specific character
-    if(subcommand === "list" && options.getString("search") !== undefined) {
+    if(subcommand === "list" && typeof options.getString("search") !== "undefined") {
       subcommand = "view";
       const characters = await client.models.Character.findAll({ where: { name: { [Op.substring]: "%" + options.getString("search") + "%" }, discordId: options.getUser("user") ? options.getUser("user").id : interaction.user.id } });
       if(characters.length === 0)
@@ -117,7 +117,7 @@ module.exports = {
       let message = await interaction.editReply({ content: "Please select what you want to edit", components: [row] });
       const option = await message
         .awaitMessageComponent({ filter, componentType: ComponentType.SelectMenu, time: 15_000 })
-        .catch(() => { return undefined; });
+        .catch(() => { return false; });
       
       if(!option) return interaction.editReply({ content: "You took too long to respond", components: [] });
       if(/(whitelist|blacklist|images)/.test(option.values[0])) {
@@ -140,7 +140,7 @@ module.exports = {
         );
         message = await interaction.editReply({ content: "What would you like to set your whitelist to?", components: [row] });
         const whitelist = await message.awaitMessageComponent({ filter, componentType: ComponentType.SelectMenu, type: 25_000, errors: ["time"] })
-          .catch(() => { return undefined; });
+          .catch(() => { return false; });
 
         if(!option) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         await whitelist.deferReply();
@@ -171,7 +171,7 @@ module.exports = {
         );
         message = await interaction.editReply({ content: "What would you like to set your blacklist to?", components: [row] });
         const blacklist = await message.awaitMessageComponent({ filter, componentType: ComponentType.SelectMenu, type: 25_000, errors: ["time"] })
-          .catch(() => { return undefined; });
+          .catch(() => { return false; });
 
         if(!option) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         await blacklist.deferReply();
@@ -208,14 +208,14 @@ module.exports = {
         const imageMessage = await interaction.editReply({ content: "What image would you like to update?", components: [row] });
         const imageOption = await imageMessage
           .awaitMessageComponent({ filter, componentType: ComponentType.SelectMenu, type: 15_000 })
-          .catch(() => { return undefined; });
+          .catch(() => { return false; });
         
         if(!imageOption) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         const modal = edit_image;
         modal.components[0].components[0].setCustomId(imageOption.values[0]);
         imageOption.showModal(modal);
         const url = await imageOption.awaitModalSubmit({ filter, time: 30_000 })
-          .catch(() => { return undefined; });
+          .catch(() => { return false; });
 
         if(!url) return interaction.editReply({ content: `${emojis.failure} | You took too long to respond!`, components: [] });
         await url.reply({ content: `${emojis.failure} | Please close this message and pay attention to the above one!`, ephemeral: true });
@@ -253,7 +253,7 @@ module.exports = {
       if(!char) return interaction.editReply({ content: `${emojis.failure} | You don't have a character with that name!` });
       if(character && char.cId === character.cId) return interaction.editReply({ content: `${emojis.failure} | That character is already active. Try using their full name if you think this is a mistake` });
       await client.models.Character.update({ active: true }, { where: { cId: char.cId } });
-      if(character !== undefined) await client.models.Character.update({ active: false }, { where: { cId: character.cId } });
+      if(typeof character !== "undefined") await client.models.Character.update({ active: false }, { where: { cId: character.cId } });
       return interaction.editReply({ content: `${emojis.success} | Successfully switched to ${char.name}!` });
     } else if(subcommand === "view") {
       if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
@@ -507,14 +507,12 @@ module.exports = {
         if(i.customId === "next") {
           page = page + 1;
           if(page > embeds.length - 1) page = 0;
-          console.info(page, embeds[page]);
           // See https://github.com/discord/discord-api-docs/issues/5279
           await message.edit({ content: "?", embeds: [embeds[page]], components: [row] });
           await i.deferUpdate();
         } else if(i.customId === "previous") {
           page = page - 1;
           if(page < 0) page = embeds.length - 1;
-          console.info(page, embeds[page]);
           // See https://github.com/discord/discord-api-docs/issues/5279
           await message.edit({ content: "?", embeds: [embeds[page]], components: [row] });
           await i.deferUpdate();

@@ -1,3 +1,4 @@
+// skipcq: JS-0044
 // eslint-disable-next-line no-unused-vars
 const { Client, CommandInteraction, CommandInteractionOptionResolver, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { Op } = require("sequelize");

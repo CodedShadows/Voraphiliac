@@ -1,3 +1,4 @@
+// skipcq: JS-D007
 // eslint-disable-next-line no-unused-vars
 const { Client, ModalSubmitInteraction, ModalSubmitFields, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require("discord.js");
 const { emojis } = require("../configs/config.json");
@@ -33,7 +34,7 @@ module.exports = {
       if((await client.models.Character.findOne({ where: { discordId: interaction.user.id, name: fields.getTextInputValue("name") } }))) return interaction.editReply({ content: "You already have a character with that name!" });
       // if a character with a name LIKE the one entered already exists, ask if they want to continue
       const similarChar = await client.models.Character.findOne({ where: { discordId: interaction.user.id, name: { [Op.substring]: fields.getTextInputValue("name") } } });
-      if(similarChar !== undefined) {
+      if(typeof similarChar !== "undefined") {
         await interaction.editReply({ content: `${emojis.warning} | You have a character that has a name like the one you entered (${similarChar.name}). Please make sure you enter the **full** name when using \`/profile switch\`` });
         await require("node:util").promisify(setTimeout)(5000);
       }

@@ -1,3 +1,4 @@
+// skipcq: JS-D007
 // eslint-disable-next-line no-unused-vars
 const { Client, EmbedBuilder, Interaction, ActionRow, ButtonComponent, SelectMenuComponent, SelectMenuInteraction, SelectMenuOptionBuilder, ComponentType, TextInputBuilder, TextInputStyle, TextInputComponent } = require("discord.js");
 const config = require("./configs/config.json");
@@ -144,7 +145,7 @@ module.exports = {
     }
     // Step 5: Cleanup
     setTimeout(() => {
-      if(message !== undefined && remove && res !== null) message.delete();
+      if(typeof message !== "undefined" && remove && res !== null) message.delete();
     }, 1500);
     await message.edit({ content, components: [] });
     return res;
@@ -195,7 +196,7 @@ module.exports = {
 
     // Step 5: Cleanup
     setTimeout(() => {
-      if(message !== undefined && remove && res !== null) message.delete();
+      if(typeof message !== "undefined" && remove && res !== null) message.delete();
     }, 1500);
     await message.edit({ content, components: [] });
     return res;

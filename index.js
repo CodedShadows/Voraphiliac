@@ -15,7 +15,7 @@ let ready = false,
 //#region Setup
 // Database
 const sequelize = new Sequelize(database.database, database.username, database.password, {
-  host: process.env.DBhost,
+  host: database.host,
   dialect: "mysql",
   // skipcq: JS-0002
   logging: process.env.environment === "development" ? console.debug : false,
@@ -238,7 +238,7 @@ client.on("interactionCreate", async (interaction) => {
 });
 //#endregion
 
-client.login(process.env.token);
+client.login(bot.token);
 
 //#region Error handling
 process.on("uncaughtException", (err, origin) => {

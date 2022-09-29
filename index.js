@@ -187,6 +187,21 @@ client.on("interactionCreate", async (interaction) => {
           return toConsole(e.stack, new Error().stack, client);
         });
       
+      let option = new Array();
+      if(interaction.options.data[0].type === "SUB_COMMAND_GROUP") {
+        for(let op of interaction.options.data[0].options[0].options) {
+          option.push(`[${op.type}] ${op.name}: ${op.value}`);
+        }
+      } else if(interaction.options.data[0].type === "SUB_COMMAND") {
+        for(let op of interaction.options.data[0].options) {
+          option.push(`[${op.type}] ${op.name}: ${op.value}`);
+        }
+      } else {
+        for(let op of interaction.options.data) {
+          option.push(`[${op.type}] ${op.name}: ${op.value}`);
+        }
+      }
+      toConsole(`${interaction.user.tag} (${interaction.user.id}) ran the command \`${interaction.commandName}\` with the following options:\n> ${option.join("\n> ") || "No options"}`, new Error().stack, client);
       await wait(1e4);
       if(ack !== null) return; // Already executed
       interaction.fetchReply()

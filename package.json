@@ -1,18 +1,17 @@
 {
   "dependencies": {
-    "@discordjs/rest": "1.1.0",
-    "discord-api-types": "0.37.10",
-    "discord.js": "14.4.0",
+    "discord-api-types": "0.37.11",
+    "discord.js": "14.5.0",
     "mysql2": "2.3.3",
     "node-fetch": "2.6.7",
-    "sequelize": "6.22.0"
+    "sequelize": "6.24.0"
   },
   "devDependencies": {
-    "eslint": "8.23.1"
+    "eslint": "8.24.0"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience.",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -22,7 +21,11 @@
     "url": "git+https://github.com/Coder-Tavi/Voraphiliac.git"
   },
   "keywords": [],
-  "author": "Tavi",
+  "author": {
+    "name" : "Tavi Wood",
+    "email" : "github_tavi@tavis.page",
+    "url" : "http://github.com/Coder-Tavi"
+  },
   "license": "GNU",
   "bugs": {
     "url": "https://github.com/Coder-Tavi/Voraphiliac/issues"

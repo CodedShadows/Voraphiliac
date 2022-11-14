@@ -1,5 +1,5 @@
 {
-  "⚠": "Remove the 'dist.' at the beginning of this file, renaming it to 'config.json' and remove this line!",
+  "⚠": "Duplicate this file and remove the dist. from the beginning of this file in the duplicate. Remove this line once done",
   "bot": {
     "applicationId": "0",
     "guildId": "0",

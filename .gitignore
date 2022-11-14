@@ -1,4 +1,8 @@
-/node_modules
+# VSCode
 /.vscode
+jsonconfig.json
+
+# Project Files
+/node_modules
 /configs/*.json
 latest-error.log

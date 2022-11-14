@@ -183,7 +183,7 @@ client.on("interactionCreate", async (interaction) => {
       if(ack !== null) return; // Already executed
       interaction.fetchReply()
         .then(m => {
-          if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "I thought about eating something too much and forgot what I was going to say... Try again. This time I'll pay attention!~", interaction, client, [true, 15]);
+          if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "I thought about eating something too much and forgot what I was going to say... Try again. This time I'll pay attention!~", interaction, client, [true, 15]).catch(false); // Suppress errors generated from slash commands returning modals
         });
     }
     break;
@@ -191,18 +191,13 @@ client.on("interactionCreate", async (interaction) => {
   case InteractionType.ModalSubmit: {
     let modal = client.modals.get(interaction.customId);
     if(modal) {
-      const ack = modal.run(client, interaction, interaction.fields)
+      modal.run(client, interaction, interaction.fields)
         .catch((e) => {
           interaction.editReply({ content: "I bit off more than I could chew and something went wrong! Please tell a developer about this (Snack code: `MDL-ERR`)!", components: [] });
           return toConsole(e.stack, new Error().stack, client);
         });
 
-      await wait(1e4);
-      if(ack !== null) return; // Already executed
-      interaction.fetchReply()
-        .then(m => {
-          if(m.content === "" && m.embeds.length === 0) interactionEmbed(3, "[ERR-UNK]", "I was dreaming of food and forgot what I was going to say. Can you try that again? I promise I'm listening~", interaction, client, [true, 15]);
-        });
+      // Other handling taken care of by files
     }
     break;
   }
@@ -214,7 +209,7 @@ client.on("interactionCreate", async (interaction) => {
     const regex = /\*Psst!\* ((?<preyName>.+) \(<@(?<preyDiscord>[0-9]{18,})>\)), .+ by ((?<predName>.+) \(<@(?<predDiscord>[0-9]{18,})>\))/;
     const { predName, predDiscord, preyName, preyDiscord } = regex.exec(interaction.message.content).groups; // skipcq: JS-D007
     const prey = await process.Character.findOne({ where: { name: preyName } });
-    if(interaction.user.id === preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
+    if(interaction.user.id != preyDiscord) return interaction.followUp({ content: "This is not your choice to make!", ephemeral: true });
     if((await interaction.guild.members.fetch(predDiscord).catch(() => { return null; })) === null) {
       if(prey.discordId !== preyDiscord) return; // User deleted character, and model is deleted
       await process.Digestion.destroy({ where: { status: "Voring", prey: prey.cId } });

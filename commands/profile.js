@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-const { SlashCommandBuilder, Client, CommandInteraction, CommandInteractionOptionResolver, ComponentType, ModalBuilder, ActionRowBuilder, SelectMenuBuilder, SelectMenuOptionBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, parseEmoji } = require("discord.js");
+const { SlashCommandBuilder, Client, CommandInteraction, CommandInteractionOptionResolver, ComponentType, ModalBuilder, ActionRowBuilder, SelectMenuBuilder, SelectMenuOptionBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder } = require("discord.js");
 const { emojis } = require("../configs/config.json");
-const { profileModals, awaitButtons, toConsole, uppercaseFirst } = require("../functions.js");
+const { profileModals, awaitButtons, toConsole, uppercaseFirst, updateDigestions } = require("../functions.js");
 const { new_profile_1, edit_image } = require("../configs/modals.js");
 const { default: fetch } = require("node-fetch");
 const { Op } = require("sequelize");
@@ -65,8 +65,8 @@ module.exports = {
         .addStringOption(option => {
           return option
             .setName("character")
-            .setDescription("The character you want to delete")
-            .setRequired(true);
+            .setDescription("The character you want to delete (Default: Active character)")
+            .setRequired(false);
         });
     }),
   /**
@@ -77,19 +77,19 @@ module.exports = {
   // skipcq: JS-0044
   run: async (client, interaction, options) => {
     const row = new ActionRowBuilder();
-    let subcommand = options.getSubcommand();
-    let character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
-    if(!/(new)/.test(subcommand)) await interaction.deferReply({ ephemeral: !/(view|list)/.test(subcommand) });
+    let subcommand = options.getSubcommand(true);
+    let character = await process.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
+    if(!/(new)/.test(subcommand) && !interaction.replied) await interaction.deferReply({ ephemeral: !/(view|list)/.test(subcommand) });
     const filter = (i) => i.user.id === interaction.user.id; 
 
     // Find details on specific character
-    if(subcommand === "list" && typeof options.getString("search") !== "undefined") {
+    if(subcommand === "list" && options.getString("search")) {
       subcommand = "view";
-      const characters = await client.models.Character.findAll({ where: { name: { [Op.substring]: "%" + options.getString("search") + "%" }, discordId: options.getUser("user") ? options.getUser("user").id : interaction.user.id } });
+      const characters = await process.Character.findAll({ where: { name: { [Op.substring]: "%" + options.getString("search") + "%" }, discordId: options.getUser("user") ? options.getUser("user").id : interaction.user.id } });
       if(characters.length === 0)
         subcommand = "list";
       else {
-        const active = await client.models.Character.findOne({ where: { discordId: characters[0].discordId, name: characters[0].name } });
+        const active = await process.Character.findOne({ where: { discordId: characters[0].discordId, name: characters[0].name } });
         if(!active)
           subcommand = "list";
         else
@@ -97,9 +97,11 @@ module.exports = {
       }
     }
 
-    if(subcommand === "new") {
+    switch(subcommand) {
+    case "new": {
       return interaction.showModal(new_profile_1);
-    } else if(subcommand === "edit") {
+    }
+    case "edit": {
       if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
       row.setComponents(
         new SelectMenuBuilder({ min_values: 1, max_values: 1, custom_id: "options" }).setOptions(
@@ -149,11 +151,11 @@ module.exports = {
         if(whitelist.values.includes("none")) whitelist.values = ["none"];
         if(whitelist.values[0] !== "none" && character.blacklist[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your blacklist to none before updating your whitelist!`, components: [] });
         try {
-          await client.models.Character.update({ whitelist: whitelist.values }, { where: { cId: character.cId } });
+          await process.Character.update({ whitelist: whitelist.values }, { where: { cId: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your whitelist!`, components: [] });
         } catch(e) {
           toConsole(String(e), new Error().stack, client);
-          return interaction.editReply({ content: `${emojis.failure} | An error occurred while updating your whitelist. Report this to a developer`, components: [] });
+          return interaction.editReply({ content: `${emojis.failure} | I couldn't write the changes to your whitelist. Report this to a developer (Snack code: \`PRF-001\`)`, components: [] });
         }
       }
       case "blacklist": {
@@ -180,11 +182,11 @@ module.exports = {
         if(blacklist.values.includes("none")) blacklist.values = ["none"];
         if(blacklist.values[0] !== "none" && character.whitelist[0] !== "none") return interaction.editReply({ content: `${emojis.failure} | Please set your whitelist to none before updating your blacklist!`, components: [] });
         try {
-          await client.models.Character.update({ blacklist: blacklist.values }, { where: { cId: character.cId } });
+          await process.Character.update({ blacklist: blacklist.values }, { where: { cId: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your blacklist!`, components: [] });
         } catch(e) {
           toConsole(String(e), new Error().stack, client);
-          return interaction.editReply({ content: `${emojis.failure} | An error occurred while updating your blacklist. Report this to a developer`, components: [] });
+          return interaction.editReply({ content: `${emojis.failure} | I couldn't apply the changes to your blacklist. Please report this to a developer (Snack code: \`PRF-002\`)`, components: [] });
         }
       }
       case "images": {
@@ -229,7 +231,7 @@ module.exports = {
     
         if(!test) return interaction.editReply({ content: `${emojis.failure} | Please enter a valid URL that exists` });
         try {
-          await client.models.Image.update({ [image.customId]: image.value }, { where: { character: character.cId } });
+          await process.Image.update({ [image.customId]: image.value }, { where: { character: character.cId } });
           return interaction.editReply({ content: `${emojis.success} | Successfully updated your image` });
         } catch(e) {
           toConsole(String(e), new Error().stack, client);
@@ -246,23 +248,54 @@ module.exports = {
         break;
       }
       }
-    } else if(subcommand === "switch") {
+      break;
+    }
+    case "switch": {
       const name = options.getString("character");
-      let char = await client.models.Character.findOne({ where: { discordId: interaction.user.id, name: name } });
-      if(!char) char = await client.models.Character.findOne({ where: { discordId: interaction.user.id, name: {[Op.substring]: name} }});
+      let char = await process.Character.findOne({ where: { discordId: interaction.user.id, name: name } });
+      if(!char) char = await process.Character.findOne({ where: { discordId: interaction.user.id, name: {[Op.substring]: name} }});
       if(!char) return interaction.editReply({ content: `${emojis.failure} | You don't have a character with that name!` });
       if(character && char.cId === character.cId) return interaction.editReply({ content: `${emojis.failure} | That character is already active. Try using their full name if you think this is a mistake` });
-      await client.models.Character.update({ active: true }, { where: { cId: char.cId } });
-      if(typeof character !== "undefined") await client.models.Character.update({ active: false }, { where: { cId: character.cId } });
+      await process.Character.update({ active: true }, { where: { cId: char.cId } });
+      if(character !== null) await process.Character.update({ active: false }, { where: { cId: character.cId } });
       return interaction.editReply({ content: `${emojis.success} | Successfully switched to ${char.name}!` });
-    } else if(subcommand === "view") {
+    }
+    case "delete": {
+      if(!character || character.name !== options.getString("character")) {
+        if(!options.getString("character"))
+          return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
+        else {
+          character = await process.Character.findOne({ where: {name: {[Op.substring]: options.getString("character")}, discordId: interaction.user.id} });
+          if(!character) return interaction.editReply({ content: `${emojis.failure} | No character found with that name` });
+        }
+      }
+      const confirmation = await awaitButtons(interaction, 15, [
+        new ButtonBuilder({ custom_id: "yes", label: "Yes, I want to delete that character", style: ButtonStyle.Danger }),
+        new ButtonBuilder({ custom_id: "no", label: "No, I don't want to delete that character", style: ButtonStyle.Success })
+      ], `Are you sure you want to delete your character, \`${character.name}\`? This action cannot be undone!`, false);
+      await confirmation.update({ components: [] });
+      if(confirmation.customId === "yes") {
+        try {
+          process.Character.destroy({ where: { cId: character.cId } });
+          return interaction.editReply({ content: `${emojis.success} | Successfully deleted your active character, \`${character.name}\``, components: [] });
+        } catch(e) {
+          toConsole(String(e), new Error().stack, client);
+          return interaction.editReply({ content: `${emojis.failure} | An error occurred while deleting your character. Please try again later`, components: [] });
+        }
+      } else {
+        return interaction.editReply({ content: `${emojis.success} | Successfully cancelled character deletion` });
+      }
+    }
+    case "view": {
       if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
-      const [images] = await client.models.Image.findOrCreate({ where: { character: character.cId }, defaults: { profile: " ", analPred: " ", analPrey: " ", breastPred: " ", breastPrey: " ", cockPred: " ", cockPrey: " ", oralPred: " ", oralPrey: " ", tailPred: " ", tailPrey: " ", unbirthPred: " ", unbirthPrey: " " } });
-      const [stats] = await client.models.Stats.findOrCreate({ where: { character: character.cId }, defaults: { health: 100, arousal: 0, digestion: 0, defiance: 0, euphoria: 0, resistance: 0, acids: 0, strength: 0 } });
-      const mementos = await client.models.Memento.findAll({ where: { character: character.cId } });
-      const items = await client.models.Item.findAll({ where: { owner: character.cId } });
-      const digestions = await client.models.Digestion.findAll({ where: { [Op.or]: { prey: character.cId, predator: character.cId } } });
-      let currentPrey = [];
+      const images = await character.getImage();
+      const stats = await character.getStat();
+      const mementos = await character.getMementos();
+      const items = await character.getItems();
+      await updateDigestions(character.cId);
+      const digestions = await process.Digestion.findAll({ where: { [Op.or]: { prey: character.cId, predator: character.cId } } });
+      let currentPrey = [],
+        statuses = [];
       for(let prey of digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey !== character.cId)) {
         let status = prey.status;
         switch(status) {
@@ -276,20 +309,22 @@ module.exports = {
           status = `who was ${prey.type} vored but is digesting`;
           break;
         }
-        prey = client.models.Character.findOne({ where: { cId: prey.prey } });
+        statuses.push(status);
+        prey = process.Character.findOne({ where: { cId: prey.prey } });
         currentPrey.push(prey);
       }
       currentPrey = await Promise.all(currentPrey)
-        .then(prey => prey.map(p => new Object({ name: p.name, status: digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.prey === p.cId)[0].status })));
-      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting)/.test(d.status) && d.predator !== character.cId);
-      if(currentPred.length > 0)
-        currentPred = await client.models.Character.findOne({ where: { cId: currentPred[0].predator } });
+        .then(prey => prey.map((p, index) => new Object({ name: p.name, status: statuses[index] })));
+      let currentPred = digestions.filter(d => /(Voring|Vored|Digesting|Digested)/.test(d.status) && d.predator !== character.cId)[0];
+      let pred;
+      if(currentPred)
+        pred = await process.Character.findOne({ where: { cId: currentPred.predator } });
       else
-        currentPred = "Nobody yet!";
+        pred = "Nobody yet!";
       const embeds = [
         new EmbedBuilder({
           title: character.name,
-          thumbnail: { url: images.profile },
+          thumbnail: { url: images.profile || "" },
           description: character.description,
           color: Math.floor(Math.random() * 16777215)
         }),
@@ -300,7 +335,7 @@ module.exports = {
           fields: [
             {
               name: "Vore Role",
-              value: `${character.role.split(" ").map(v => uppercaseFirst(v))}`,
+              value: `${character.role.split(" ").map(v => uppercaseFirst(v)).join(" ")}`,
               inline: true
             },
             {
@@ -343,6 +378,7 @@ module.exports = {
             text: `Owned by ${character.discordId}`
           }
         }),
+        "Placeholder",
         new EmbedBuilder({
           title: `${character.name} | Stats`,
           thumbnail: { url: images.profile },
@@ -350,12 +386,12 @@ module.exports = {
           fields: [
             {
               name: "Spending some time inside of...",
-              value: `${typeof currentPred !== "string" ? `${currentPred.name} since <t:${Math.floor(currentPred.createdAt.getTime()/1000)}>` : currentPred}`,
+              value: `${typeof pred !== "string" ? `${pred.name} since <t:${Math.floor(currentPred.voreUpdate.getTime()/1000)}>` : pred}`,
               inline: true
             },
             {
               name: "Enjoying the taste of some prey...",
-              value: `...which includes: ${currentPrey.length > 0 ? currentPrey.map((obj) => `${obj.name} ${obj.status.toLowerCase()}`).join(", ") : "Nobody yet!"}`,
+              value: `...which includes: ${currentPrey.length > 0 ? currentPrey.map((obj) => `${obj.name} ${obj.status}`).join(", ") : "Nobody yet!"}`,
             },
             {
               name: "Health",
@@ -370,11 +406,6 @@ module.exports = {
             {
               name: "Euphoria",
               value: stats.euphoria,
-              inline: true
-            },
-            {
-              name: "Digestion Strength",
-              value: stats.digestion,
               inline: true
             },
             {
@@ -493,6 +524,51 @@ module.exports = {
           }
         })
       ];
+      if(typeof pred !== "string") {
+        const predStats = await pred.getStat();
+        embeds.splice(2, 1, new EmbedBuilder({
+          title: `${character.name} | Digestion`,
+          description: "*Where 'Stomach' is used, it represents where you are being held in your predator. This does not mean your own!*",
+          thumbnail: { url: images.profile },
+          color: Math.floor(Math.random() * 16777215),
+          fields: [
+            {
+              name: "Status",
+              value: `${uppercaseFirst(currentPred.status)} via ${uppercaseFirst(currentPred.type)}${uppercaseFirst(currentPred.type) !== "Unbirth" ? " Vore" : ""}`,
+              inline: true
+            },
+            {
+              name: "Prey Exhaustion",
+              value: `${stats.pExhaustion > 7 ? "High" : (stats.pExhaustion > 3 ? "Medium" : "Low")} (${stats.pExhaustion})`,
+              inline: true
+            },
+            {
+              name: "Stomach Health",
+              value: predStats.sHealth,
+              inline: true
+            },
+            {
+              name: "Stomach Power",
+              value: predStats.sPower,
+              inline: true
+            },
+            {
+              name: "Stomach Resistance",
+              value: predStats.sResistance,
+              inline: true
+            },
+            {
+              name: "Stomach Acids",
+              value: predStats.acids,
+              inline: true
+            }
+          ],
+          footer: {
+            text: `Owned by ${character.discordId}`
+          }
+        }));
+      } else
+        embeds.splice(2, 1);
       let page = 0;
       const paginationRow = new ActionRowBuilder().setComponents(
         new ButtonBuilder({ customId: "previous", label: "◀️", style: ButtonStyle.Primary }),
@@ -500,22 +576,18 @@ module.exports = {
         new ButtonBuilder({ customId: "next", label: "▶️", style: ButtonStyle.Primary }),
       );
       interaction.editReply({ embeds: [embeds[page]], components: [paginationRow] });
-      const message = await interaction.fetchReply();
-      const coll = message.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 120_000 });
+      const coll = await interaction.fetchReply()
+        .then(r => r.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 120_000 }));
       
-      coll.on("collect", async (i) => {
+      coll.on("collect", (i) => {
         if(i.customId === "next") {
           page = page + 1;
           if(page > embeds.length - 1) page = 0;
-          // See https://github.com/discord/discord-api-docs/issues/5279
-          await message.edit({ content: "?", embeds: [embeds[page]], components: [row] });
-          await i.deferUpdate();
+          i.update({ embeds: [embeds[page]], components: [paginationRow] });
         } else if(i.customId === "previous") {
           page = page - 1;
           if(page < 0) page = embeds.length - 1;
-          // See https://github.com/discord/discord-api-docs/issues/5279
-          await message.edit({ content: "?", embeds: [embeds[page]], components: [row] });
-          await i.deferUpdate();
+          i.update({ embeds: [embeds[page]], components: [paginationRow] });
         } else {
           coll.stop();
         }
@@ -526,28 +598,11 @@ module.exports = {
       });
 
       return;
-    } else if(subcommand === "delete") {
-      if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
-      const confirmation = await awaitButtons(interaction, 15, [
-        new ButtonBuilder({ custom_id: "yes", label: "Yes, I want to delete the active character", style: ButtonStyle.Danger }),
-        new ButtonBuilder({ custom_id: "no", label: "No, I don't want to delete the active character", style: ButtonStyle.Primary })
-      ], `Are you sure you want to delete your active character, \`${character.name}\`? This action cannot be undone!`, false);
-      await confirmation.deleteReply();
-      if(confirmation.customId === "yes") {
-        try {
-          client.models.Character.delete({ where: { cId: character.cId } });
-          return interaction.editReply({ content: `${emojis.success} | Successfully deleted your active character, \`${character.name}\`` });
-        } catch(e) {
-          toConsole(String(e), new Error().stack, client);
-          return interaction.editReply({ content: `${emojis.failure} | An error occurred while deleting your character. Please try again later` });
-        }
-      } else {
-        await interaction.editReply({ content: `${emojis.success} | Successfully cancelled character deletion` });
-      }
-    } else if(subcommand === "list") {
-      await interaction.editReply({ content: `${emojis.warning} | Fetching your characters...` });
+    }
+    case "list": {
       const user = interaction.options.getUser("user") || interaction.user;
-      const characters = await client.models.Character.findAll({ where: { discordId: user.id } });
+      const characters = await process.Character.findAll({ where: { discordId: user.id } });
+      await updateDigestions(character.cId);
       const fields = characters.map(char => {
         return {
           name: char.name,
@@ -558,10 +613,15 @@ module.exports = {
       return interaction.editReply({ content: "", embeds: [new EmbedBuilder({
         title: `${user.username}'s Characters`,
         color: Math.floor(Math.random() * 16777215),
-        fields: fields.length > 0 ? fields : [{ name: "No characters", value: "This user has no characters", inline: true }]
+        fields: fields.length > 0 ? fields : [{ name: "No characters", value: "This user has no characters", inline: true }],
+        footer: {
+          text: options.getString("search") ? `No characters found for "${options.getString("search")}" - Returning existing characters` : ""
+        }
       })] });
-    } else {
-      interaction.editReply({ content: "It works!" });
+    }
+    default: {
+      interaction.editReply({ content: `${emojis.failure} | Something went wrong and you shouldn't be seeing this. Report this to a developer with this code: \`PF-EL001\`` });
+    }
     }
   }
 };

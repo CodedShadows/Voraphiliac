@@ -11,9 +11,9 @@ module.exports.import = (sequelize) => sequelize.define("Memento", {
     allowNull: false,
     references: {
       model: "Characters",
-      key: "cId",
-      onDelete: "CASCADE"
-    }
+      key: "cId"
+    },
+    onDelete: "CASCADE"
   },
   title: {
     type: DataTypes.TEXT("tiny"),
@@ -33,6 +33,6 @@ module.exports.import = (sequelize) => sequelize.define("Memento", {
   flags: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    default: 0
+    defaultValue: 0
   }
 });

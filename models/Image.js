@@ -11,99 +11,112 @@ module.exports.import = (sequelize) => sequelize.define("Image", {
     allowNull: false,
     references: {
       model: "Characters",
-      key: "cId",
-      onDelete: "CASCADE"
-    }
+      key: "cId"
+    },
+    onDelete: "CASCADE"
   },
   profile: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   analPred: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   analPrey: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   breastPred: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   breastPrey: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   cockPred: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   cockPrey: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   oralPred: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   oralPrey: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   tailPred: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   tailPrey: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   unbirthPred: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   },
   unbirthPrey: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(512),
     allowNull: false,
     validation: {
       is: /^((https:\/\/).+(\.).+\/.+(\.png|\.jpg)| )$/
-    }
+    },
+    defaultValue: " "
   }
 });

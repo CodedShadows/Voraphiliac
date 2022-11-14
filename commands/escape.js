@@ -1,7 +1,9 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, CommandInteraction, CommandInteractionOptionResolver, SlashCommandBuilder } = require("discord.js");
 const { emojis } = require("../configs/config.json");
+const { massage, move_fail, move_pass, pleasure_crit, pleasure_fail, pleasure_pass, struggle_fail, struggle_pass_pred, struggle_pass } = require("../configs/responses.json");
 const { Op } = require("sequelize");
+const { updateDigestions, replaceVars } = require("../functions");
 
 module.exports = {
   name: "escape",
@@ -37,72 +39,115 @@ module.exports = {
    * @param {CommandInteractionOptionResolver} options
    */
   run: async (client, interaction, options) => {
-    await interaction.deferReply();
-    const type = options.getString("type") ?? "Struggle";
-    const character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
+    if(!interaction.replied) await interaction.deferReply(); // In case of overload
+    let exhaustion = 0;
+    let type = options.getString("type") ?? "Struggle";
+    const character = await process.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
     if(!character) return interaction.editReply({ content: `${emojis.failure} | You don't have an active character!` });
-    const digestion = await client.models.Digestion.findOne({ where: { prey: character.cId, status: {[Op.or]: ["Vored", "Digesting"]} } });
+    await updateDigestions(character.cId);
+    const digestion = await process.Digestion.findOne({ where: { prey: character.cId, status: {[Op.or]: ["Vored", "Digesting"]} } });
     if(!digestion)
       return interaction.editReply({ content: `${emojis.failure} | Oops, you're not inside a predator! Maybe try again later when you've found your way inside one` });
-    const stats = await client.models.Stats.findOne({ where: { character: {[Op.or]: [digestion.prey, digestion.predator]} } });
+    const stats = await process.Stats.findAll({ where: { character: {[Op.or]: [digestion.prey, digestion.predator]} } });
     if(stats.length < 2) return interaction.editReply({ content: `${emojis.failure} | Something went wrong. Please verify your predator still exists (Run \`/profile list\` pn your predator)` });
-    const predStats = stats.filter(s => s.character === digestion.predator);
-    const preyStats = stats.filter(s => s.character === digestion.prey);
-    switch(type) {
-    case "Massage": {
-      await client.models.Stats.update({
-        strength: digestion.strength - 1 > 0 ? digestion.strength - 1 : 0
-      }, { where: { character: digestion.predator } });
-      await client.models.Stats.update({
-        defiance: preyStats.arousal - 5 > 0 ? preyStats.arousal - 5 : (preyStats.arousal - 5) + 1
-      }, { where: { character: digestion.prey } });
-      return interaction.editReply({ content: "*You massage the inside of your predator, making sure to pay special attention to what they want. Once you find a special spot, you rub it a bit more. The acids inside have calmed down!* (`-Arousal` `-Pred Digestive Strength`" });
-    }
-    case "Struggle": {
-      let success = Math.floor(Math.random() * 100);
-      success += (preyStats.defiance/1.5) - digestion.strength - preyStats.euphoria - predStats.digestion;
-      if(success > ((digestion.acids * 2) + digestion.strength + 10)) {
-        await client.models.Digestion.update({ status: "Free" }, { where: { prey: digestion.prey } });
-        await client.models.Stats.update({ acids: 0, strength: 0 }, { where: { character: digestion.pred } });
-        return interaction.editReply({ content: "*You struggle as hard as you can and for a second, you feel freedom. However, alas, it was not meant to be and you slipped back inside. However this time, you were determined. You kept pushing on and eventually, you found your way outside of your predator!* (`+Defiance`)" });
+    const predStats = stats.filter(s => s.character === digestion.predator)[0];
+    const preyStats = stats.filter(s => s.character === digestion.prey)[0];
+    const pred = await predStats.getCharacter();
+    const prey = await preyStats.getCharacter();
+    try {
+      switch(type) {
+      case "Massage": {
+        if(preyStats.pExhaustion < 1) throw new Error("Too exhausted for massaging");
+        await Promise.all(
+          process.Stats.update({sPower: digestion.sPower - 1}, { where: { character: digestion.predator } }),
+          process.Stats.update({defiance: preyStats.arousal - 5}, { where: { character: digestion.prey } })
+        );
+        // massage
+        interaction.editReply({ content: `${replaceVars(massage[Math.floor(Math.random()*massage.length)], ["pred", "prey"], [pred.name, prey.name])} (\`-Arousal\` \`-Pred Digestive Strength\`)` });
+        exhaustion = exhaustion++;
+        break;
       }
-      await client.models.Stats.update({
-        strength: digestion.strength + 5 > 100 ? 100 : digestion.strength + 5
-      }, { where: { character: digestion.predator } });
-      return interaction.editReply({ content: "*You try your best to struggle but in the end, your efforts were fruitless and you stayed inside your predator. Your home shook for a second and you pressed against it. It felt stronger...* (`+Predator Strength`)" });
-    }
-    case "Move Around": {
-      const flip = Math.floor(Math.random() * 2);
-      if(flip === 0) {
-        await client.models.Stats.update({
-          strength: digestion.strength + 2 > 100 ? 100 : digestion.strength + 2
-        }, { where: { character: digestion.predator } });
-        return interaction.editReply({ content: "*You decide to move around your new home inside your predator. Unfortunately, this doesn't make your predator that happy.* (`+Predator Strength`)" });
+      case "Struggle": {
+        let success = Math.floor(Math.random() * 100);
+        success += (preyStats.defiance/1.5) - digestion.sPower - preyStats.euphoria - predStats.digestion;
+        if(success > ((digestion.acids * 2) + digestion.sPower + 10)) {
+          if(preyStats.pExhaustion < 2) throw new Error("Too exhausted for successful struggle");
+          const newPred = await process.Digestion.findOne({ where: { prey: digestion.pred, status: {[Op.or]: ["Vored", "Digesting", "Digested"]} } });
+          if(newPred) {
+            await process.Digestion.update({ status: "Vored", predator: newPred.predator, voreUpdate: new Date() });
+            // struggle_pass_pred
+            interaction.editReply({ content: `${replaceVars(struggle_pass_pred[Math.floor(Math.random()*struggle_pass_pred.length)], ["prey", "pred"], [pred.name, prey.name])} (\`+Defiance\`)` });
+          } else {
+            await process.Digestion.update({ status: "Free" }, { where: { dId: digestion.dId } });
+            // struggle_pass
+            interaction.editReply({ content: `${replaceVars(struggle_pass[Math.floor(Math.random*struggle_pass.length)], ["pred", "prey"], [pred.name, prey.name])} (\`+Defiance\`)` });
+          }
+          await preyStats.increment({ defiance: 5, euphoria: -1 });
+          exhaustion = exhaustion+2;
+        } else {
+          if(preyStats.pExhaustion < 3) throw new Error("Too exhausted for failed struggle");
+          await process.Stats.update({
+            strength: digestion.sPower + 5
+          }, { where: { character: digestion.predator } });
+          // struggle_fail
+          interaction.editReply({ content: `${replaceVars(struggle_fail[Math.floor(Math.random()*struggle_fail.length)], ["pred", "prey"], [pred.name, prey.name])} (\`+Predator Strength\`)` });
+        }
+        break;
       }
-      await client.models.Stats.update({
-        strength: digestion.strength - 2 < 0 ? 0 : digestion.strength - 2
-      }, { where: { character: digestion.predator } });
-      return interaction.editReply({ content: "*You move around your while inside your predator, curious about what you can do. Luckily, you manage to rub them right and they relax a little.* (`-Predator Strength`)" });
-    }
-    case "Pleasure": {
-      const pValue = Math.ceil(Math.random() * 100);
-      if(pValue > 50) {
-        await client.models.Stats.update({
-          arousal: predStats.arousal + 5
-        }, { where: { character: digestion.pred } });
-        return interaction.editReply({ content: "*You move around inside your predator, finding a sensitive spot. You use all of your body to push against it, rubbing, licking, and doing anything you can to please that one point. A sound of pleasure comes out of your predator, and you feel like something changed inside.* (`+Predator Arousal`)" });
+      case "Move Around": {
+        const flip = Math.floor(Math.random() * 2);
+        if(flip === 0) {
+          if(preyStats.pExhaustion < 2) throw new Error("Too exhausted for failed movement");
+          await process.Stats.update({
+            sPower: digestion.sPower+1
+          }, { where: { character: digestion.predator } });
+          // move_fail
+          interaction.editReply({ content: `${replaceVars(move_fail[Math.floor(Math.random()*move_fail.length)], ["pred", "prey"], [pred.name, prey.name])} (\`+Predator Strength\`)` });
+          exhaustion = exhaustion+2;
+        } else {
+          if(preyStats.pExhaustion < 1) throw new Error("Too exhausted for successful movement");
+          await process.Stats.update({
+            sPower: digestion.sPower-2
+          }, { where: { character: digestion.predator } });
+          // move_pass
+          interaction.editReply({ content: `${replaceVars(move_pass[Math.floor(Math.random()*move_pass.length)], ["pred", "prey"], [pred.name, prey.name])} (\`-Predator Strength\`)` });
+          exhaustion = exhaustion++;
+        }
+        break;
       }
-      if(pValue < 25) {
-        await client.models.Stats.update({
-          arousal: predStats.arousal + 3
-        }, { where: { character: digestion.pred } });
-        return interaction.editReply({ content: "*Trying to find a special spot inside your predator is hard. Once you've found it, you try your hardest to please it. After some energy spent on pleasing them, you notice that something changed a bit...* (`+Predator Arousal`)" });
+      case "Pleasure": {
+        const pValue = Math.ceil(Math.random() * 100);
+        if(pValue > 50) {
+          if(preyStats.pExhaustion < 1) throw new Error("Too exhausted for successful arousal");
+          await predStats.increment({ arousal: 5 });
+          // pleasure_crit
+          interaction.editReply({ content: `${replaceVars(pleasure_crit[Math.floor(Math.random()*pleasure_crit.length)], ["pred", "prey"], [pred.name, prey.name])} (\`++Predator Arousal\`)` });
+          exhaustion = exhaustion++;
+        }
+        if(pValue < 25) {
+          if(preyStats.pExhaustion < 1) throw new Error("Too exhausted for neutral arousal");
+          await predStats.increment({ arousal: 3 });
+          // pleasure_pass
+          interaction.editReply({ content: `${replaceVars(pleasure_pass[Math.floor(Math.random()*pleasure_pass.length)], ["pred", "prey"], [pred.name, prey.name])} (\`+Predator Arousal\`)` });
+          exhaustion = exhaustion++;
+        }
+        if(pValue < 0) {
+          if(preyStats.pExhaustion < 2) throw new Error("Too exhausted for failed arousal");
+          // pleasure_fail
+          interaction.editReply({ content: `${replaceVars(pleasure_fail[Math.floor(Math.random()*pleasure_fail.length)], ["pred", "prey"], [pred.name, prey.name])}` });
+          exhaustion = exhaustion+2;
+        }
+        break;
       }
-      return interaction.editReply({ content: "*You try your best to find a place to please your predator. However, you were unable to find one. You feel a bit tired but could probably continue.*" });
+      default: {
+        interaction.editReply({ content: "Don't scare me like that! You found something you're not supposed to. Tell a developer before you end up in my stomach... (Snack code: `ES-001`)" });
+        break;
+      }
+      }
+    } catch(e) {
+      return interaction.editReply({ content: `${emojis.failure} | *You try to take an action but your body fails you. Your muscles won't move, you're too tired!*` });
     }
-    default: {
-      return interaction.editReply({ content: `${emojis.failure} | Something went terribly wrong and you shouldn't be seeing this! Please report this to a developer!` });
-    }
-    }
+
+    return process.Stats.update({ pExhaustion: preyStats.pExhaustion-exhaustion }, { where: { character: digestion.prey }});
   }
 };

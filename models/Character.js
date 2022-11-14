@@ -13,10 +13,7 @@ module.exports.import = (sequelize) => sequelize.define("Character", {
   active: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-  },
-  busy: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
+    defaultValue: false
   },
   // -- CHARACTER INFO -- //
   name: {
@@ -43,44 +40,80 @@ module.exports.import = (sequelize) => sequelize.define("Character", {
     allowNull: false,
   },
   weight: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 3),
     allowNull: false,
   },
   height: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 3),
     allowNull: false,
   },
   // -- VORE INFO -- //
   whitelist: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING,
     allowNull: false,
-    validation: {
-      is: /\[.+,*\]/
-    },
     set(value) {
-      if(!Array.isArray(value)) throw new Error(value + " is not an array");
-      return JSON.stringify(value);
+      try {
+        if(typeof value === "string")
+          value = JSON.parse(value);
+        else
+          value = Array.from(value);
+        
+        if(!Array.isArray(value)) throw new Error("Value is not an array");
+      } catch(e) {
+        throw new Error(value + " is not an array");
+      }
+      return this.setDataValue("whitelist", JSON.stringify(value));
     },
     get() {
       return JSON.parse(this.getDataValue("whitelist"));
-    }
+    },
+    defaultValue: "[\"all\"]"
   },
   blacklist: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING,
     allowNull: false,
-    validation: {
-      is: /\[.+,*\]/
-    },
     set(value) {
-      if(!Array.isArray(value)) throw new Error(value + " is not an array");
-      return JSON.stringify(value);
+      try {
+        if(typeof value === "string")
+          value = JSON.parse(value);
+        else
+          value = Array.from(value);
+
+        if(!Array.isArray(value)) throw new Error("Value is not an array");
+      } catch(e) {
+        throw new Error(value + " is not an array");
+      }
+      return this.setDataValue("blacklist", JSON.stringify(value));
     },
     get() {
       return JSON.parse(this.getDataValue("blacklist"));
-    }
+    },
+    defaultValue: "[\"none\"]"
   },
   autodigest: {
     type: DataTypes.BOOLEAN,
-    allowNull: false
+    allowNull: false,
+    defaultValue: false
+  },
+  lastDigest: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    set(value) {
+      try {
+        if(typeof value === "string")
+          value = JSON.parse(value);
+        else
+          value = Array.from(value);
+
+        if(!Array.isArray(value)) throw new Error("Value is not an array");
+      } catch(e) {
+        throw new Error(value + " is not an array");
+      }
+      return this.setDataValue("lastDigest", JSON.stringify(value));
+    },
+    get() {
+      return JSON.parse(this.getDataValue("lastDigest"));
+    },
+    defaultValue: "[\"N/A\"]"
   }
 });

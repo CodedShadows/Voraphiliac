@@ -53,17 +53,17 @@ module.exports = {
    */
   // skipcq: JS-0044
   run: async (client, interaction, options) => {
-    await interaction.deferReply();
+    if(!interaction.replied) await interaction.deferReply(); // In case of overload
     let type = options.getString("type") || "oral";
     type = type.split(" ")[0].toLowerCase();
     const target = options.getMember("target");
     if(!target) return interaction.editReply({ content: `${emojis.failure} | Your target doesn't exist on this server`});
 
-    const character = await client.models.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
-    const victim = await client.models.Character.findOne({ where: { discordId: target.id, active: true } });
+    const character = await process.Character.findOne({ where: { discordId: interaction.user.id, active: true } });
+    const victim = await process.Character.findOne({ where: { discordId: target.id, active: true } });
     if(!character) return interaction.editReply({ content: `${emojis.failure} | You need an active character to use this command` });
     if(!victim) return interaction.editReply({ content: `${emojis.failure} | Your target doesn't have an active character` });
-    const digestions = await client.models.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, prey: { [Op.or]: [character.cId, victim.cId] }}, predator: { [Op.or]: [character.cId, victim.cId] } });
+    const digestions = await process.Digestion.findAll({ where: { status: { [Op.or]: ["Voring", "Vored", "Digesting"] }, prey: { [Op.or]: [character.cId, victim.cId] }}, predator: { [Op.or]: [character.cId, victim.cId] } });
     const cDigestions_pred = digestions.filter(d => d.predator === character.cId);
     const cDigestions_prey = digestions.filter(d => d.prey === character.cId);
     const vDigestions_pred = digestions.filter(d => d.predator === victim.cId);
@@ -104,9 +104,9 @@ module.exports = {
     }
 
     try {
-      await client.models.Digestion.create({
-        status: "Voring",
+      await process.Digestion.create({
         type: type,
+        voreUpdate: new Date(),
         predator: character.cId,
         prey: victim.cId
       });

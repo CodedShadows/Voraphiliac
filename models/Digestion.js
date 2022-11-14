@@ -7,32 +7,39 @@ module.exports.import = (sequelize) => sequelize.define("Digestion", {
     autoIncrement: true
   },
   status: {
-    type: DataTypes.TEXT("tiny"),
+    type: DataTypes.STRING(10),
     allowNull: false,
     validation: {
       is: /(Voring|Vored|Digesting|Digested|Reformed|Escaped)/
-    }
+    },
+    defaultValue: "Voring"
   },
   type: {
-    type: DataTypes.TEXT("tiny"),
+    type: DataTypes.STRING(10),
     allowNull: false,
+    defaultValue: "oral"
+  },
+  voreUpdate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
   },
   predator: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: "Characters",
-      key: "cId",
-      onDelete: "CASCADE"
-    }
+      key: "cId"
+    },
+    onDelete: "CASCADE"
   },
   prey: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: "Characters",
-      key: "cId",
-      onDelete: "CASCADE"
-    }
+      key: "cId"
+    },
+    onDelete: "CASCADE"
   }
 });

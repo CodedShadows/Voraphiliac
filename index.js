@@ -237,6 +237,7 @@ client.on("interactionCreate", async (interaction) => {
 client.login(bot.token);
 
 //#region Errors
+const recentErrors = [];
 process.on("uncaughtException", (err, origin) => {
   if(!ready) {
     fs.writeFileSync("./latest-error.log", JSON.stringify({code: 14, promise: JSON.stringify(err), time: new Date().toString()}, null, 2));
@@ -245,6 +246,20 @@ process.on("uncaughtException", (err, origin) => {
   toConsole(`An [uncaughtException] has occurred.\n\n> ${err}\n> ${origin}`, new Error().stack, client);
 });
 process.on("unhandledRejection", async (promise) => {
+  // Anti-spam System
+  if(recentErrors.length > 2) {
+    recentErrors.push({ promise: String(promise), time: new Date() });
+    recentErrors.shift();
+  } else {
+    recentErrors.push({ promise: String(promise), time: new Date() });
+  }
+  if(recentErrors.length === 3
+    && (recentErrors[0].promise === recentErrors[1].promise && recentErrors[1].promise === recentErrors[2].promise)
+    && recentErrors[0].time.getTime() - recentErrors[2].time.getTime() < 1e4) {
+    fs.writeFileSync("./latest-error.log", JSON.stringify({code: 15, info: {source: "Anti spam triggered! Three errors with the same content have occurred recently", promise}, time: new Date().toString()}, null, 2));
+    return process.exit(17);
+  }
+
   if(!ready) {
     fs.writeFileSync("./latest-error.log", JSON.stringify({code: 15, promise: JSON.stringify(promise), time: new Date().toString()}, null, 2));
     return process.exit(15);

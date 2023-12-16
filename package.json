@@ -7,7 +7,7 @@
     "sequelize": "6.24.0"
   },
   "devDependencies": {
-    "eslint": "8.24.0"
+    "eslint": "8.56.0"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience.",

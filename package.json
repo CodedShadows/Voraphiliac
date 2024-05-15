@@ -1,20 +1,28 @@
 {
   "dependencies": {
-    "discord-api-types": "0.37.11",
-    "discord.js": "14.5.0",
-    "mysql2": "2.3.3",
-    "node-fetch": "2.6.7",
-    "sequelize": "6.24.0"
+    "discord.js": "14.15.2",
+    "mysql2": "3.9.7",
+    "node-fetch": "3.3.2",
+    "sequelize": "6.37.3",
+    "typescript": "5.4.5"
   },
   "devDependencies": {
-    "eslint": "8.56.0"
+    "@types/node": "20.12.12",
+    "@types/node-fetch": "2.6.11",
+    "@types/sequelize": "4.28.20",
+    "eslint": "9.2.0"
   },
   "name": "voraphiliac",
-  "description": "Vore bot that utilizes Discord's Interaction system for a unique experience.",
-  "version": "0.5.0",
+  "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",
+  "version": "0.7.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "test": "npx tsc && npx eslint --fix ./ && node index.js",
+    "build": "npx tsc -b -v",
+    "clean": "npx tsc -b --clean",
+    "start": "node index.js",
+    "lint": "npx eslint --fix ./",
+    "serve": "docker compose build && docker compose up -d"
   },
   "repository": {
     "type": "git",
@@ -22,9 +30,9 @@
   },
   "keywords": [],
   "author": {
-    "name" : "Tavi Wood",
-    "email" : "github_tavi@tavis.page",
-    "url" : "http://github.com/Coder-Tavi"
+    "name": "Tavi Wood",
+    "email": "github_tavi@tavis.page",
+    "url": "http://github.com/Coder-Tavi"
   },
   "license": "GNU",
   "bugs": {

@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // Recommended setup for running the bot in the debugger
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Build & Start Bot",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "environment": "development"
+      },
+      "preLaunchTask": "npm: build",
+      "program": "index.js",
+      "cwd": "${workspaceFolder}/dist"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Start Bot",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "environment": "development"
+      },
+      "program": "index.js",
+      "cwd": "${workspaceFolder}/dist"
+    },
+  ]
+}

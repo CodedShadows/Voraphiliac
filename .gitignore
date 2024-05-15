@@ -1,8 +1,12 @@
-# VSCode
-/.vscode
-jsonconfig.json
-
 # Project Files
-/node_modules
-/configs/*.json
+/src/configs/*.json
+!/src/configs/dist.*.json
 latest-error.log
+
+# NPM
+/node_modules
+package-lock.json
+
+# TSC
+/dist
+/src/**/*.js

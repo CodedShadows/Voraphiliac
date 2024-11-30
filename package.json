@@ -11,7 +11,7 @@
     "@types/node": "20.12.12",
     "@types/node-fetch": "2.6.11",
     "@types/sequelize": "4.28.20",
-    "eslint": "9.3.0"
+    "eslint": "9.16.0"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",

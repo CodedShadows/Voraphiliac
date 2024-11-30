@@ -1,20 +1,65 @@
-import { Client, CommandInteraction, ModalSubmitFields, ModalSubmitInteraction, SlashCommandBuilder } from "discord.js";
-import { Sequelize } from "sequelize";
-import { Character, Digestion, Image, Item, Memento, Stats } from "./Models";
+import { ChatInputCommandInteraction, Client, SlashCommandBuilder } from 'discord.js';
+import { Logger } from 'pino';
+import { Sequelize } from 'sequelize';
+import { initModels } from '../models/init-models.js';
 
-interface CustomProcess extends NodeJS.Process {
-  Character?: Character;
-  Digestion?: Digestion;
-  Image?: Image;
-  Item?: Item;
-  Memento?: Memento;
-  Stats?: Stats;
-}
-interface CustomClient extends Client {
-  commands?: Map<string, {name: string, data: SlashCommandBuilder, run(client: Client, interaction: CommandInteraction, options: CommandInteraction["options"]): Promise<void>}>
-  modals?: Map<string, {name: string, run(client: Client, interaction: ModalSubmitInteraction, fields: ModalSubmitFields): Promise<void>}>
+export interface CustomClient<Ready extends boolean = boolean> extends Client {
+  /** @desc Commands for the bot to handle */
+  commands?: Map<string, CommandFile>;
+  /** @desc Functions dynamically imported */
+  functions?: Map<string, FunctionFile>;
+  /** @desc Sequelize instance */
   sequelize?: Sequelize;
-  models?: Sequelize["models"];
+  /** @desc Sequelize models for the database */
+  models?: ReturnType<typeof initModels>;
+  /** @desc Whether the bot is ready to accept commands */
+  ready?: boolean;
+  /** @desc Logging ({@link Ready} determines type: true is {@link Logger}, false is {@link Console}) */
+  logs?: Ready extends true ? Logger : Console;
 }
+// Various types of file that will be imported
+export interface CommandFile {
+  name?: string;
+  ephemeral?: boolean;
+  data?: SlashCommandBuilder;
+  execute: ({ client, interaction, options }: CmdFileArgs) => Promise<void>;
+}
+export interface FunctionFile {
+  name: string;
+  execute: (client: CustomClient, ...args: unknown[]) => Promise<unknown>;
+}
+// Instatuts Metric Typings
+export interface RawMetric {
+  id: string;
+  name: string;
+  active: boolean;
+  order: number;
+  suffix: string;
+  data: MetricData[];
+}
+export interface MetricData {
+  timestamp: number;
+  value: number;
+}
+export interface MetricPut {
+  name: string;
+  suffix: string;
+}
+export interface MetricDataPoint {
+  id: string;
+  value: number;
+  timestamp: number;
+}
+export interface MetricDataPointPost {
+  timestamp: number;
+  value: number;
+}
+export const EventTypeArray = ['ready', 'init', 'events'] as const;
+// Export EventTypes as any member of the array
+export type EventTypes = 'ready' | 'init' | 'events';
 
-export { CustomClient, CustomProcess }
+export type CmdFileArgs = {
+  client: CustomClient<true>;
+  interaction: ChatInputCommandInteraction;
+  options: ChatInputCommandInteraction['options'];
+};

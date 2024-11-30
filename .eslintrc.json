@@ -1,50 +1,23 @@
 {
   "env": {
-    "commonjs": true,
     "es2021": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
+  "overrides": [],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
+  "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
-    "array-callback-return": "error",
-    "no-await-in-loop": "error",
-    "no-duplicate-imports": "error",
-    "no-self-compare": "error",
-    "no-unmodified-loop-condition": "error",
-    "no-unreachable-loop": "error",
-    "no-use-before-define": "error",
-    "require-atomic-updates": "error",
-    "indent": [
-      "error",
-      2
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "double"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ],
-    "complexity": [
-      "error",
-      100
-    ],
-    "prefer-destructuring": [
+    "prettier/prettier": "warn",
+    "@typescript-eslint/no-unused-vars": [
       "error",
       {
-        "AssignmentExpression": {
-          "array": false
-        }
+        "argsIgnorePattern": "^_"
       }
-    ],
-    "eqeqeq": "error"
+    ]    
   }
 }

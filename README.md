@@ -2,6 +2,8 @@
 This is a bot dedicated to vore because I decided that making a project big enough like this was a good idea.
 
 ## Development status
+> [!Warning]
+> This project is being restructured and updated to a newer codebase. Files may move or change rapidly.
 This bot is in the "fast development" stage meaning changes will be made rapidly. Please do not expect any current features to remain the same until Version 1.x is released. The current version can be found in the package.json or in commit messages.
 
 ## Hosting

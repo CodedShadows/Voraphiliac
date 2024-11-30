@@ -42,7 +42,7 @@ const ItemFlags = {
   /**
    * Item cannot be used
    */
-  NoUse: BigInt(0 << 8),
+  NoUse: BigInt(0 << 8)
 } as const;
 
 export { ItemFlags };

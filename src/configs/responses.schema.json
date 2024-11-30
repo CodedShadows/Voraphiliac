@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "You can use substitutions in the responses. See GitHub for a full list",
+  "type": "object",
+  "properties": {
+    "vore": {
+      "type": "object",
+      "description": "Responses used for vore actions",
+      "properties": {
+        "anal": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for anal vore actions"
+          },
+          "minItems": 1
+        },
+        "breast": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for breast vore actions"
+          },
+          "minItems": 1
+        },
+        "cv": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for cv vore actions"
+          },
+          "minItems": 1
+        },
+        "oral": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for oral vore actions"
+          },
+          "minItems": 1
+        },
+        "tail": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for tail vore actions"
+          },
+          "minItems": 1
+        },
+        "unbirth": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for unbirth vore actions"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "anal",
+        "breast",
+        "cv",
+        "oral",
+        "tail",
+        "unbirth"
+      ]
+    },
+    "actions": {
+      "type": "object",
+      "description": "Responses used for actions",
+      "properties": {
+        "massage": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used for massage actions"
+          },
+          "minItems": 1
+        },
+        "struggle_fail": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character fails a struggle action"
+          },
+          "minItems": 1
+        },
+        "struggle_pass": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character passes a struggle action as prey"
+          },
+          "minItems": 1
+        },
+        "struggle_pass_pred": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character passes a struggle action as predator"
+          },
+          "minItems": 1
+        },
+        "move_fail": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character fails a move action"
+          },
+          "minItems": 1
+        },
+        "move_pass": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character passes a move action"
+          },
+          "minItems": 1
+        },
+        "pleasure_crit": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character critically succeeds a pleasure action"
+          },
+          "minItems": 1
+        },
+        "pleasure_pass": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character passes a pleasure action"
+          },
+          "minItems": 1
+        },
+        "pleasure_fail": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character fails a pleasure action"
+          },
+          "minItems": 1
+        },
+        "digested": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character is digested"
+          },
+          "minItems": 1
+        },
+        "reform_outside": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character reforms regularly"
+          },
+          "minItems": 1
+        },
+        "reform_inside": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Responses used when a character reforms inside another character"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "massage",
+        "struggle_fail",
+        "struggle_pass",
+        "struggle_pass_pred",
+        "move_fail",
+        "move_pass",
+        "pleasure_crit",
+        "pleasure_pass",
+        "pleasure_fail",
+        "digested",
+        "reform_outside",
+        "reform_inside"
+      ]
+    }
+  },
+  "required": [
+    "vore",
+    "actions"
+  ]
+}

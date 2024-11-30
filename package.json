@@ -1,8 +1,9 @@
 {
   "dependencies": {
-    "discord.js": "14.15.2",
-    "mysql2": "3.9.7",
+    "discord.js": "^14.15.3",
+    "mysql2": "3.9.8",
     "node-fetch": "3.3.2",
+    "pino": "9.1.0",
     "sequelize": "6.37.3",
     "typescript": "5.4.5"
   },
@@ -10,7 +11,7 @@
     "@types/node": "20.12.12",
     "@types/node-fetch": "2.6.11",
     "@types/sequelize": "4.28.20",
-    "eslint": "9.2.0"
+    "eslint": "9.3.0"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",
@@ -38,5 +39,6 @@
   "bugs": {
     "url": "https://github.com/Coder-Tavi/Voraphiliac/issues"
   },
-  "homepage": "https://github.com/Coder-Tavi/Voraphiliac#readme"
+  "homepage": "https://github.com/Coder-Tavi/Voraphiliac#readme",
+  "type": "module"
 }

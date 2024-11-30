@@ -1,6 +1,7 @@
 # Project Files
 /src/configs/*.json
-!/src/configs/dist.*.json
+!/src/configs/*.schema.json
+logs
 latest-error.log
 
 # NPM
@@ -8,5 +9,4 @@ latest-error.log
 package-lock.json
 
 # TSC
-/dist
-/src/**/*.js
+dist

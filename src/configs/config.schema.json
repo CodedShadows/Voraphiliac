@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "bot": {
+      "type": "object",
+      "properties": {
+        "applicationId": {
+          "type": "string",
+          "description": "Discord bot application ID"
+        },
+        "guildId": {
+          "type": "string",
+          "description": "Guild ID you plan to use for testing the bot"
+        },
+        "token": {
+          "type": "string",
+          "description": "Discord bot token. KEEP THIS SECRET!"
+        }
+      },
+      "required": ["applicationId", "guildId", "token"]
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Database host URI"
+        },
+        "username": {
+          "type": "string",
+          "default": "root",
+          "description": "Database username"
+        },
+        "password": {
+          "type": "string",
+          "description": "Database password. KEEP THIS SECRET!"
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name"
+        }
+      },
+      "required": ["host", "username", "password", "database"]
+    },
+    "discord": {
+      "type": "object",
+      "properties": {
+        "logChannel": {
+          "type": "string",
+          "description": "Channel ID for logging"
+        },
+        "suppressChannel": {
+          "type": "string",
+          "description": "Channel ID for suppressed errors"
+        }
+      },
+      "required": ["logChannel", "suppressChannel"]
+    }
+  },
+  "emojis": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "string",
+        "description": "Success raw emoji string"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error raw emoji string"
+      },
+      "failure": {
+        "type": "string",
+        "description": "Failure raw emoji string"
+      }
+    },
+    "required": ["success", "error", "failure"]
+  },
+  "required": ["bot", "database", "discord", "emojis"]
+}

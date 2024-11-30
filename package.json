@@ -4,7 +4,7 @@
     "mysql2": "3.9.8",
     "node-fetch": "3.3.2",
     "pino": "9.1.0",
-    "sequelize": "6.37.3",
+    "sequelize": "6.37.5",
     "typescript": "5.4.5"
   },
   "devDependencies": {

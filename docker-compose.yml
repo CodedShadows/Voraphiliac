@@ -4,6 +4,9 @@ services:
     build:
       context: ./
     restart: on-failure
-    volumes:
-      - ${configfile}:/usr/src/voraphiliac/src/configs/config.json
-      - ${responsesfile}:/usr/src/voraphiliac/src/configs/responses.json
+
+secrets:
+  configFile:
+    file: ${configfile}
+  responsesFile:
+    file: ${responsesfile}

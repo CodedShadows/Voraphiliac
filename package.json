@@ -1,27 +1,27 @@
 {
   "dependencies": {
-    "discord.js": "^14.15.3",
-    "mysql2": "3.9.8",
+    "discord.js": "14.16.3",
+    "mysql2": "3.11.5",
     "node-fetch": "3.3.2",
-    "pino": "9.1.0",
-    "sequelize": "6.37.3",
-    "typescript": "5.4.5"
+    "pino": "9.5.0",
+    "sequelize": "6.37.5",
+    "typescript": "5.7.2"
   },
   "devDependencies": {
-    "@types/node": "20.12.12",
-    "@types/node-fetch": "2.6.11",
+    "@types/node": "20.17.9",
+    "@types/node-fetch": "2.6.12",
     "@types/sequelize": "4.28.20",
-    "eslint": "9.3.0"
+    "eslint": "9.16.0"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "main": "index.js",
   "scripts": {
-    "test": "npx tsc && npx eslint --fix ./ && node index.js",
+    "test": "npx tsc && npx eslint --fix ./ && cd dist && node index.js",
     "build": "npx tsc -b -v",
     "clean": "npx tsc -b --clean",
-    "start": "node index.js",
+    "start": "cd dist && node index.js && cd ..",
     "lint": "npx eslint --fix ./",
     "serve": "docker compose build && docker compose up -d"
   },

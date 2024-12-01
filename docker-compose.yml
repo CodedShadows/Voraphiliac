@@ -2,10 +2,10 @@ services:
   app:
     build:
       context: ./
+      secrets:
+        - configFile
+        - responsesFile
     restart: on-failure
-    secrets:
-      - configFile
-      - responsesFile
 
 secrets:
   configFile:

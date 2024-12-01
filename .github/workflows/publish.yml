@@ -10,6 +10,7 @@ jobs:
     env:
       configfile: ${{ secrets.CONFIGFILE }}
       responsesfile: ${{ secrets.RESPONSESFILE }}
+      instatusfile: ${{ secrets.INSTATUSFILE }}
 
     steps:
       - uses: actions/checkout@v4

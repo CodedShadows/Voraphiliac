@@ -5,6 +5,7 @@ services:
       secrets:
         - configFile
         - responsesFile
+        - instatusFile
     restart: on-failure
 
 secrets:
@@ -12,3 +13,5 @@ secrets:
     file: ${configfile}
   responsesFile:
     file: ${responsesfile}
+  instatusFile:
+    file: ${instatusfile}

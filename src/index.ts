@@ -8,16 +8,7 @@ if (process.env.environment === 'development') console.debug('Starting in develo
 //#endregion
 
 //#region Discord init
-const client: CustomClient<false> = new Client({
-  intents: [
-    IntentsBitField.Flags.Guilds,
-    IntentsBitField.Flags.GuildMembers,
-    IntentsBitField.Flags.GuildModeration,
-    IntentsBitField.Flags.GuildEmojisAndStickers,
-    IntentsBitField.Flags.GuildMessages,
-    IntentsBitField.Flags.DirectMessages
-  ]
-});
+const client: CustomClient<false> = new Client();
 client.logs = console;
 // Load all functions
 const funcs = await import('./functions/load.js').then((f) => f.execute(client)).catch((e) => client.logs.error(e));

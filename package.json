@@ -8,10 +8,16 @@
     "typescript": "5.7.2"
   },
   "devDependencies": {
+    "@eslint/js": "9.16.0",
     "@types/node": "20.17.9",
     "@types/node-fetch": "2.6.12",
     "@types/sequelize": "4.28.20",
-    "eslint": "9.16.0"
+    "eslint": "9.16.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "globals": "15.12.0",
+    "prettier": "3.4.1",
+    "typescript-eslint": "8.16.0"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",

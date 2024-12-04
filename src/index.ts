@@ -8,9 +8,11 @@ if (process.env.environment === 'development') console.debug('Starting in develo
 //#endregion
 
 //#region Discord init
-const client: CustomClient<false> = new Client();
+const client: CustomClient<false> = new Client({
+  intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.GuildMessages]
+});
 client.logs = console;
-// Load all functions
+// Load all functions`
 const funcs = await import('./functions/load.js').then((f) => f.execute(client)).catch((e) => client.logs.error(e));
 if (!funcs) process.exit(1);
 client.functions = funcs;
@@ -26,7 +28,7 @@ client.commands = new Collection();
 client.on('ready', () => {
   client.ready = true;
   client.logs.info(`Logged in as ${client.user.tag}!`);
-  toConsole(`Logged in as ${client.user.tag}!`, new Error().stack!, client)
+  toConsole(`Logged in as ${client.user.tag}!`, new Error().stack!, client);
   // Run all ready functions
   Array.from(client.functions.keys())
     .filter((f) => f.startsWith('events_ready'))

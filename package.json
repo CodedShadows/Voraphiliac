@@ -5,7 +5,7 @@
     "node-fetch": "3.3.2",
     "pino": "9.5.0",
     "sequelize": "6.37.5",
-    "typescript": "5.7.2"
+    "typescript": "5.8.3"
   },
   "devDependencies": {
     "@eslint/js": "9.16.0",

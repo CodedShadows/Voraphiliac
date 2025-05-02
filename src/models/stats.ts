@@ -65,7 +65,7 @@ export type statsData = {
    * Automatically regens, decreases on /digest
    */
   pExhaustion: number;
-}
+};
 
 export type statsPk = 'statId';
 export type statsId = stats[statsPk];

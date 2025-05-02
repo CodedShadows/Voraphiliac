@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import {
   ActionRowBuilder,
   SlashCommandBuilder,
@@ -6,8 +5,8 @@ import {
   StringSelectMenuInteraction,
   StringSelectMenuOptionBuilder
 } from 'discord.js';
-import { default as config } from '../configs/config.json' assert { type: 'json' };
-import { default as responses } from '../configs/responses.json' assert { type: 'json' };
+import { default as config } from '../configs/config.json' with { type: 'json' };
+import { default as responses } from '../configs/responses.json' with { type: 'json' };
 import { characters, stats } from '../models/init-models.js';
 import { CmdFileArgs } from '../typings/Extensions.js';
 const { emojis } = config;
@@ -102,7 +101,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
         components: [preyRow]
       })
       .then((m) => m.awaitMessageComponent({ time: 30_000, filter: (i) => i.user.id === interaction.user.id }))
-      .catch((e) => null);
+      .catch(() => null);
 
     if (!preyInteraction) {
       interaction.editReply({ content: `${emojis.failure} | You took too long to respond!` });
@@ -157,11 +156,19 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
     else results.push({ prey, stats: preyStats, result: false });
   }
   // Increase acids by 2/10 chance
-  if (Math.ceil(Math.random() * 10) > 8 && predStats.data.acids === 10) predStats.data.acids += 1;
+  if (Math.ceil(Math.random() * 10) > 8 && predStats.data.acids === 10) {
+    predStats.data = {
+      ...predStats.data,
+      acids: predStats.data.acids + 1
+    };
+  }
   // Decrease energy by the amount of prey digested (rounded down) times the type
-  predStats.data.pExhaustion -= Math.floor(preyCharacters.length / 2) + type;
+  predStats.data = {
+    ...predStats.data,
+    pExhaustion: predStats.data.pExhaustion - Math.floor(preyCharacters.length / 2) - type
+  };
   // Handle success
-  const promises: Promise<any>[] = [];
+  const promises: Promise<stats | unknown>[] = [];
   promises.push(predStats.save());
   results
     .filter((v) => v.result)
@@ -173,7 +180,10 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
       hpDecrease += type * 2;
       if (type === 2) hpDecrease += 25;
       if (hpDecrease < 0) hpDecrease = 0;
-      v.stats.data.health -= hpDecrease;
+      v.stats.data = {
+        ...v.stats.data,
+        health: v.stats.data.health - hpDecrease
+      };
       promises.push(v.stats.save());
       promises.push(client.functions.get('utils_updateDigestions').execute(client, v.prey.characterId));
     });
@@ -181,7 +191,12 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
   await Promise.all(promises);
 
   // Heal stomach
-  if (type === DigestionType.Massage) predStats.data.sHealth += 5;
+  if (type === DigestionType.Massage) {
+    predStats.data = {
+      ...predStats.data,
+      sHealth: predStats.data.sHealth + 5
+    };
+  }
   // Generate result text
   const parsedResults = results.map(async (v) => {
     const random = actions.digested[Math.floor(Math.random() * actions.digested.length)];

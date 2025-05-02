@@ -1,7 +1,6 @@
-// eslint-disable-next-line no-unused-vars
 import { SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
-import { default as config } from '../configs/config.json' assert { type: 'json' };
+import { default as config } from '../configs/config.json' with { type: 'json' };
 import { CmdFileArgs } from '../typings/Extensions.js';
 const { emojis } = config;
 
@@ -82,10 +81,10 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
           stats.data.health >= 115
             ? 0x00ff00
             : stats.data.health >= 85
-            ? 0xffff00
-            : stats.data.health >= 35
-            ? 0xffa500
-            : 0xff0000
+              ? 0xffff00
+              : stats.data.health >= 35
+                ? 0xffa500
+                : 0xff0000
       }
     ]
   });

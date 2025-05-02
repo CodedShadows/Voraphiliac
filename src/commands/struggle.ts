@@ -1,8 +1,7 @@
-// eslint-disable-next-line no-unused-vars
 import { SlashCommandBuilder } from 'discord.js';
 import { Op } from 'sequelize';
-import { default as config } from '../configs/config.json' assert { type: 'json' };
-import { default as responses } from '../configs/responses.json' assert { type: 'json' };
+import { default as config } from '../configs/config.json' with { type: 'json' };
+import { default as responses } from '../configs/responses.json' with { type: 'json' };
 import { CmdFileArgs } from '../typings/Extensions.js';
 const { emojis } = config;
 const { actions } = responses;
@@ -35,7 +34,7 @@ export const data = new SlashCommandBuilder()
 export async function execute({ client, interaction, options }: CmdFileArgs): Promise<void> {
   await interaction.deferReply(); // In case of overload
   let exhaustion = 0;
-  let type = options.getString('type') ?? 'Struggle';
+  const type = options.getString('type') ?? 'Struggle';
   const character = await client.models.characters.findOne({
     where: { discordId: interaction.user.id, active: true }
   });
@@ -78,8 +77,14 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
     switch (type) {
       case 'Massage': {
         if (preyStats.data.pExhaustion < 1) throw new Error('Too exhausted for massaging');
-        predStats.data.sPower -= 1;
-        preyStats.data.defiance -= 5;
+        predStats.data = {
+          ...predStats.data,
+          sPower: predStats.data.sPower - 1
+        };
+        preyStats.data = {
+          ...preyStats.data,
+          defiance: preyStats.data.defiance - 5
+        };
         await Promise.all([predStats.save(), preyStats.save()]);
         // massage
         interaction.editReply({
@@ -194,14 +199,17 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
         break;
       }
     }
-  } catch (e) {
+  } catch (_e) {
     interaction.editReply({
       content: `${emojis.failure} | *You try to take an action but your body fails you. Your muscles won't move, you're too tired!*`
     });
     return;
   }
 
-  preyStats.data.pExhaustion -= exhaustion;
+  preyStats.data = {
+    ...preyStats.data,
+    pExhaustion: preyStats.data.pExhaustion - exhaustion
+  };
   preyStats.save();
   predStats.save();
   return;

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { readdirSync } from 'node:fs';
-import { default as config } from '../../../configs/config.json' assert { type: 'json' };
+import { default as config } from '../../../configs/config.json' with { type: 'json' };
 import { CommandFile, CustomClient } from '../../../typings/Extensions.js';
 
 export const name = 'commands';

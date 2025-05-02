@@ -1,5 +1,5 @@
-import { ModalSubmitInteraction } from "discord.js";
-import { CustomClient } from "../../../typings/Extensions.js";
+import { ModalSubmitInteraction } from 'discord.js';
+import { CustomClient } from '../../../typings/Extensions.js';
 
 export const name = 'modal';
 export async function execute(client: CustomClient<true>, interaction: ModalSubmitInteraction): Promise<void> {

@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -14,7 +13,7 @@ import {
 } from 'discord.js';
 import fetch, { Response } from 'node-fetch';
 import { Op } from 'sequelize';
-import { default as config } from '../configs/config.json' assert { type: 'json' };
+import { default as config } from '../configs/config.json' with { type: 'json' };
 import { edit_image, new_profile_1, profileModals } from '../configs/modals.js';
 import { toConsole } from '../functions.js';
 import { characters } from '../models/init-models.js';
@@ -239,8 +238,11 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
           if (whitelist.values.includes('all')) whitelist.values = ['all'];
           if (whitelist.values.includes('none')) whitelist.values = ['none'];
           try {
-            character.pref.whitelist = whitelist.values;
-            character.pref.blacklist = [];
+            character.pref = {
+              ...character.pref,
+              whitelist: whitelist.values,
+              blacklist: []
+            };
             await character.save();
             interaction.editReply({
               content: `${emojis.success} | Successfully updated your whitelist!`,
@@ -305,8 +307,11 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
           if (blacklist.values.includes('all')) blacklist.values = ['all'];
           if (blacklist.values.includes('none')) blacklist.values = ['none'];
           try {
-            character.pref.blacklist = blacklist.values;
-            character.pref.whitelist = [];
+            character.pref = {
+              ...character.pref,
+              whitelist: [],
+              blacklist: blacklist.values
+            };
             await character.save();
             interaction.editReply({
               content: `${emojis.success} | Successfully updated your blacklist!`,
@@ -582,9 +587,9 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
       const digestions = await client.models.digestions.findAll({
         where: { [Op.or]: { prey: character.characterId, predator: character.characterId } }
       });
-      let currentPrey: Promise<characters>[] = [],
+      const currentPrey: Promise<characters>[] = [],
         statuses = [];
-      for (let prey of digestions.filter(
+      for (const prey of digestions.filter(
         (d) => /(Voring|Vored|Digesting)/.test(d.status) && d.prey !== character.characterId
       )) {
         let status: string;
@@ -607,7 +612,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
       const resolvedPrey: { name?: string; status?: string }[] = await Promise.all(currentPrey)
         .then((prey) => prey.map((p, index) => ({ name: p.data.name, status: statuses[index] })))
         .catch(() => null);
-      let currentPred = digestions.filter(
+      const currentPred = digestions.filter(
         (d) => /(Voring|Vored|Digesting|Digested)/.test(d.status) && d.predator !== character.characterId
       )[0];
       let pred: characters | string;
@@ -683,7 +688,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
               name: 'Spending some time inside of...',
               value: `${
                 typeof pred !== 'string'
-                  ? `${pred.data.name} since <t:${Math.floor(currentPred.voreUpdate.getTime() / 1000)}>`
+                  ? `${pred.data.name} since <t:${Math.floor(currentPred.createdAt.getTime() / 1000)}>`
                   : pred
               }`,
               inline: true

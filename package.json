@@ -21,7 +21,7 @@
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "main": "index.js",
   "scripts": {
     "test": "npx tsc && npx eslint --fix ./ && cd dist && node index.js",

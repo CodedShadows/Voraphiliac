@@ -7,5 +7,19 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
-  eslintPluginPrettierRecommended
+  eslintPluginPrettierRecommended,
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+          args: 'after-used'
+        }
+      ]
+    }
+  }
 );

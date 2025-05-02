@@ -2,12 +2,7 @@ import { CustomClient } from '../../typings/Extensions.js';
 
 export const name = 'replaceVars';
 // Rare case this isn't a Promise
-export function execute(
-  _client: CustomClient,
-  string: string,
-  args: Array<string>,
-  values: Array<string>
-): string {
+export function execute(_client: CustomClient, string: string, args: Array<string>, values: Array<string>): string {
   if (!string || !args || !values)
     throw new SyntaxError(
       `One or more of the required parameters are missing in [replaceVars]\n\n> ${string}\n> ${args}\n> ${values}`

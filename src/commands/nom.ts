@@ -1,6 +1,5 @@
-// eslint-disable-next-line no-unused-vars
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, GuildMember, SlashCommandBuilder } from 'discord.js';
-import { default as config } from '../configs/config.json' assert { type: 'json' };
+import { default as config } from '../configs/config.json' with { type: 'json' };
 import { toConsole } from '../functions.js';
 import { CmdFileArgs } from '../typings/Extensions.js';
 const { emojis } = config;
@@ -121,7 +120,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
     return;
   }
   // If the victim is vored
-  for (let index in vDigestions_prey.filter((d) => d.status === 'Vored')) {
+  for (const index in vDigestions_prey.filter((d) => d.status === 'Vored')) {
     const digestion = vDigestions_prey.filter((d) => d.status === 'Vored')[index];
     // If the victim is vored by the character
     if (character.characterId === digestion.predator) {
@@ -139,7 +138,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
     }
   }
   // Check if character is vored
-  for (let index in cDigestions_prey.filter((d) => d.status === 'Vored')) {
+  for (const index in cDigestions_prey.filter((d) => d.status === 'Vored')) {
     const digestion = cDigestions_prey.filter((d) => d.status === 'Vored')[index];
 
     // If the character is vored by the victim
@@ -169,7 +168,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
     await interaction.editReply({
       content: `${
         emojis.success
-} | *The thought of voring ${victim.data.name.trim()} suddenly engulfs ${character.data.name.trim()} and they start to vore them!*`
+      } | *The thought of voring ${victim.data.name.trim()} suddenly engulfs ${character.data.name.trim()} and they start to vore them!*`
     });
     const row: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder({
       components: [

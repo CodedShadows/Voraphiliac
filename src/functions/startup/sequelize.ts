@@ -1,11 +1,11 @@
 import { Sequelize } from 'sequelize';
-import { default as config } from '../../configs/config.json' assert { type: 'json' };
+import { default as config } from '../../configs/config.json' with { type: 'json' };
 import { CustomClient } from '../../typings/Extensions.js';
 const { database } = config;
 
 export const name = 'sequelize';
 export async function execute(client: CustomClient, _ready: boolean): Promise<void> {
-  const { environment } = process.env
+  const { environment } = process.env;
   // Login to Sequelize
   const sequelize = new Sequelize(database.database, database.username, database.password, {
     host: database.host,

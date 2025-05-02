@@ -1,5 +1,5 @@
 import { ModalSubmitFields, ModalSubmitInteraction } from 'discord.js';
-import { default as config } from '../../configs/config.json' assert { type: 'json' };
+import { default as config } from '../../configs/config.json' with { type: 'json' };
 import { interactionEmbed, toConsole } from '../../functions.js';
 import { CustomClient } from '../../typings/Extensions.js';
 const { emojis } = config;

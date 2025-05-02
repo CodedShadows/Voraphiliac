@@ -1,5 +1,5 @@
 import { CustomClient, RawMetric } from '../../../typings/Extensions.js';
-import { default as is } from '../../../configs/instatus.json' assert { 'type': 'json' };
+import { default as is } from '../../../configs/instatus.json' with { type: 'json' };
 
 export const name = 'latency';
 export async function execute(client: CustomClient): Promise<void> {

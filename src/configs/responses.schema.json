@@ -56,14 +56,7 @@
           "minItems": 1
         }
       },
-      "required": [
-        "anal",
-        "breast",
-        "cv",
-        "oral",
-        "tail",
-        "unbirth"
-      ]
+      "required": ["anal", "breast", "cv", "oral", "tail", "unbirth"]
     },
     "actions": {
       "type": "object",
@@ -182,8 +175,5 @@
       ]
     }
   },
-  "required": [
-    "vore",
-    "actions"
-  ]
+  "required": ["vore", "actions"]
 }

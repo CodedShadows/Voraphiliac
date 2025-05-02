@@ -9,7 +9,7 @@ import {
   InteractionEditReplyOptions,
   InteractionType
 } from 'discord.js';
-import { default as config } from './configs/config.json' assert { type: 'json' };
+import { default as config } from './configs/config.json' with { type: 'json' };
 import { CustomClient } from './typings/Extensions.js';
 
 //#region Enums
@@ -61,7 +61,10 @@ export async function toConsole(message: string, source: string, client: CustomC
       ]
     })
     .catch((err: Error) => {
-      client.logs.error({ err }, `[ERR] At ${new Date().toString()}, toConsole called but message failed to send\n\n> msg: ${message}`);
+      client.logs.error(
+        { err },
+        `[ERR] At ${new Date().toString()}, toConsole called but message failed to send\n\n> msg: ${message}`
+      );
     });
   return;
 }
@@ -117,10 +120,10 @@ export function parseTime(time: string): number {
       unit === 'd'
         ? Number(amount) * 24 * 60 * 60
         : unit === 'h'
-        ? Number(amount) * 60 * 60
-        : unit === 'm'
-        ? Number(amount) * 60
-        : Number(amount);
+          ? Number(amount) * 60 * 60
+          : unit === 'm'
+            ? Number(amount) * 60
+            : Number(amount);
   }
 
   return duration;

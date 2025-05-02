@@ -1,6 +1,6 @@
-import { ComponentType, Message, MessageComponentInteraction } from 'discord.js';
+import { ComponentType, MessageComponentInteraction } from 'discord.js';
 import { CustomClient } from '../../../typings/Extensions.js';
-import { default as responses } from '../../../configs/responses.json' assert { type: 'json' };
+import { default as responses } from '../../../configs/responses.json' with { type: 'json' };
 const { vore } = responses;
 
 export const name = 'component';
@@ -18,7 +18,7 @@ export async function execute(client: CustomClient<true>, interaction: MessageCo
   if (!predName || !predDiscord || !preyName || !preyDiscord) return; // Invalid component we thought we could handle
   // Fetch the prey and reject if the user is not the prey
   const prey = await client.models.characters.findOne({ where: { ['data.name']: preyName } });
-  if (interaction.user.id === predDiscord && answer === "no") {
+  if (interaction.user.id === predDiscord && answer === 'no') {
     await client.models.digestions.destroy({ where: { status: 'Voring', prey: prey.characterId } });
 
     return interaction.editReply({
@@ -28,7 +28,7 @@ export async function execute(client: CustomClient<true>, interaction: MessageCo
   }
   if (interaction.user.id != preyDiscord)
     return interaction.followUp({ content: 'This is not your choice to make!', ephemeral: true });
-  // Try to find the pred in the server. 
+  // Try to find the pred in the server.
   const predMember = await interaction.guild.members.fetch(predDiscord).catch(() => null);
   if (predMember === null) {
     if (prey.discordId !== preyDiscord) return; // User deleted character, and model is deleted
@@ -51,8 +51,11 @@ export async function execute(client: CustomClient<true>, interaction: MessageCo
       await prey
         .getStats()
         .then((stats) => {
-          stats.data.euphoria += 5;
-          stats.data.resistance -= 1;
+          stats.data = {
+            ...stats.data,
+            euphoria: stats.data.euphoria + 5,
+            resistance: stats.data.resistance - 1
+          };
           return stats.save();
         })
         .catch(() => null);

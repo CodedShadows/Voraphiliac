@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import {
   ActionRowBuilder,
   BaseInteraction,
@@ -10,7 +9,7 @@ import {
   ModalSubmitInteraction
 } from 'discord.js';
 import { Op } from 'sequelize';
-import { default as config } from '../../configs/config.json' assert { type: 'json' };
+import { default as config } from '../../configs/config.json' with { type: 'json' };
 import { new_profile_2 } from '../../configs/modals.js';
 import { toConsole } from '../../functions.js';
 import { charactersData } from '../../models/characters.js';
@@ -26,7 +25,7 @@ export async function execute(
   fields: ModalSubmitFields
 ): Promise<void> {
   const r1 = new RegExp('^(Pred(ator)? Switch|(Apex )?Pred(ator)?)|(Switch)|(Prey( Switch)?)$', 'i');
-  // eslint-disable-next-line no-useless-escape
+
   const r2 = new RegExp('^[0-9]{0,10}(?:.[0-9]{1,3})?$');
   const filter = (i: BaseInteraction) => i.user.id === interaction.user.id;
   const row: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
@@ -49,7 +48,7 @@ export async function execute(
       return null;
     });
 
-    if (!m2) return null as any;
+    if (!m2) return null as void;
     submitted = true;
     await m2.deferReply({ ephemeral: false });
     m2.deleteReply();
@@ -85,7 +84,7 @@ export async function execute(
       await interaction.editReply({
         content: `${emojis.warning} | You have a character that has a name (${similarChar.data.name}) like the one you entered. Please make sure you enter the **full** name when using commands`
       });
-      await require('node:util').promisify(setTimeout)(5000);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     try {

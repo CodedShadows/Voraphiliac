@@ -1,5 +1,4 @@
 import { Op } from 'sequelize';
-import { stats } from '../../models/init-models.js';
 import { CustomClient } from '../../typings/Extensions.js';
 
 export const name = 'updateDigestions';
@@ -19,8 +18,11 @@ export async function execute(client: CustomClient, characterId: string): Promis
   // Handle digestion
   if (preyStats.data.health === 0) {
     digestion.update({ status: 'Digested' });
-    predStats.data.health = 1;
-    predStats.data.pExhaustion = 10;
+    predStats.data = {
+      ...predStats.data,
+      health: 1,
+      pExhaustion: 10
+    };
     predStats.save();
     return;
   }
@@ -41,8 +43,11 @@ export async function execute(client: CustomClient, characterId: string): Promis
   if (preyStats.data.health + health > 115) health = 115 - preyStats.data.health;
   health = health * Math.floor((Date.now() - preyStats.updatedAt.getTime()) / 21600000);
   // Data attr update
-  preyStats.data.pExhaustion += exhaustion;
-  preyStats.data.health += health;
+  preyStats.data = {
+    ...preyStats.data,
+    pExhaustion: preyStats.data.pExhaustion + exhaustion,
+    health: preyStats.data.health + health
+  };
   const p = [
     preyStats.save(),
     client.models.digestions.update({ voreUpdate: new Date() }, { where: { digestionId: digestion.digestionId } })

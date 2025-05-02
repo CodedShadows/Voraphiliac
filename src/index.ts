@@ -1,7 +1,7 @@
 //#region Packages
 import { Client, Collection, IntentsBitField } from 'discord.js';
 import { CustomClient } from './typings/Extensions.js';
-import { default as config } from './configs/config.json' assert { type: 'json' };
+import { default as config } from './configs/config.json' with { type: 'json' };
 import { toConsole } from './functions.js';
 // Log developer mode
 if (process.env.environment === 'development') console.debug('Starting in development mode');

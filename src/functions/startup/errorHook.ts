@@ -3,7 +3,7 @@ import { toConsole } from '../../functions.js';
 import { default as fs } from 'node:fs';
 
 export const name = 'errorHook';
-export async function execute(client: CustomClient, ready: boolean): Promise<void> {
+export async function execute(client: CustomClient, _ready: boolean): Promise<void> {
   const recentErrors: { promise: Promise<unknown>; reason: string; time: Date }[] = [];
   process.on('uncaughtExceptionMonitor', (err, origin) => {
     console.error('Process exiting shortly due to uncaughtException. go fix it.', err);

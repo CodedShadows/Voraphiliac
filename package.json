@@ -33,18 +33,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Coder-Tavi/Voraphiliac.git"
+    "url": "git+https://github.com/CodedShadows/Voraphiliac.git"
   },
   "keywords": [],
   "author": {
     "name": "Tavi Wood",
     "email": "github_tavi@tavis.page",
-    "url": "http://github.com/Coder-Tavi"
+    "url": "http://github.com/totallytavi"
   },
   "license": "GNU",
   "bugs": {
-    "url": "https://github.com/Coder-Tavi/Voraphiliac/issues"
+    "url": "https://github.com/CodedShadows/Voraphiliac/issues"
   },
-  "homepage": "https://github.com/Coder-Tavi/Voraphiliac#readme",
+  "homepage": "https://github.com/CodedShadows/Voraphiliac#readme",
   "type": "module"
 }

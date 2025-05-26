@@ -4,7 +4,7 @@ import { CustomClient } from './typings/Extensions.js';
 import { default as config } from './configs/config.json' with { type: 'json' };
 import { toConsole } from './functions.js';
 // Log developer mode
-if (process.env.environment === 'development') console.debug('Starting in development mode');
+if (process.env.NODE_ENV === 'development') console.warn('Starting in development mode');
 //#endregion
 
 //#region Discord init
@@ -26,13 +26,14 @@ client.commands = new Collection();
 //#endregion
 //#region Discord events
 client.on('ready', () => {
-  client.ready = true;
   client.logs.info(`Logged in as ${client.user.tag}!`);
   toConsole(`Logged in as ${client.user.tag}!`, new Error().stack!, client);
   // Run all ready functions
   Array.from(client.functions.keys())
     .filter((f) => f.startsWith('events_ready'))
     .forEach((f) => client.functions.get(f).execute(client));
+
+  client.ready = true;
 });
 
 client.on('interactionCreate', async (interaction) => {

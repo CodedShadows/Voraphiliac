@@ -13,7 +13,8 @@ export const data = new SlashCommandBuilder()
   })
   .setNSFW(true);
 export async function execute({ client, interaction, options }: CmdFileArgs): Promise<void> {
-  if (!interaction.replied) await interaction.deferReply(); // In case of overload
+  await interaction.deferReply();
+
   let status: string;
   let active = await client.models.characters.findOne({
     where: { discordId: interaction.user.id, active: true }

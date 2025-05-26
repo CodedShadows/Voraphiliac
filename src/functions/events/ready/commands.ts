@@ -5,7 +5,6 @@ import { CommandFile, CustomClient } from '../../../typings/Extensions.js';
 
 export const name = 'commands';
 export async function execute(client: CustomClient<true>): Promise<void> {
-  const { environment } = process.env;
   // Get all files in the commands directory
   const files = readdirSync('./commands', { recursive: true })
     // Map Buffers to string
@@ -24,7 +23,7 @@ export async function execute(client: CustomClient<true>): Promise<void> {
     try {
       const command: CommandFile = await import(`../../../commands/${name}`);
       // Rewrite cmd name if development
-      if (command.data && environment === 'development') command.data.setName(`d_${command.data.name}`);
+      if (command.data && process.env.NODE_ENV === 'development') command.data.setName(`d_${command.data.name}`);
       // If the command has data, use that and push data
       if (command.data) {
         name = command.data.name;
@@ -39,7 +38,7 @@ export async function execute(client: CustomClient<true>): Promise<void> {
     }
   }
   // Register the commands
-  if (environment === 'development') {
+  if (process.env.NODE_ENV === 'development') {
     // Testing server if development
     client.guilds
       .fetch(config.bot.guildId)

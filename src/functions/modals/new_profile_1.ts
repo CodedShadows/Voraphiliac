@@ -30,13 +30,13 @@ export async function execute(
   const filter = (i: BaseInteraction) => i.user.id === interaction.user.id;
   const row: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
   row.addComponents(new ButtonBuilder({ custom_id: 'confirm', label: 'Confirm', style: ButtonStyle.Success }));
-  const message = await interaction.reply({
+  const callback = await interaction.reply({
     content: 'Click the button to continue (Note: If the modal fails, pleases re-run the command)',
     components: [row],
-    ephemeral: true,
-    fetchReply: true
+    flags: ['Ephemeral'],
+    withResponse: true
   });
-  const confirm = message.createMessageComponentCollector({
+  const confirm = callback.resource.message.createMessageComponentCollector({
     filter,
     componentType: ComponentType.Button,
     time: 30_000
@@ -50,7 +50,7 @@ export async function execute(
 
     if (!m2) return null as void;
     submitted = true;
-    await m2.deferReply({ ephemeral: false });
+    await m2.deferReply({ flags: [] });
     m2.deleteReply();
     await interaction.editReply({ content: ':gear: Processing, please wait', components: [] });
 

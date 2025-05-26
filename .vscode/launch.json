@@ -10,7 +10,7 @@
         "<node_internals>/**"
       ],
       "env": {
-        "environment": "development"
+        "NODE_ENV": "development"
       },
       "preLaunchTask": "npm: build",
       "program": "index.js",
@@ -24,7 +24,7 @@
         "<node_internals>/**"
       ],
       "env": {
-        "environment": "development"
+        "NODE_ENV": "development"
       },
       "program": "index.js",
       "cwd": "${workspaceFolder}/dist"

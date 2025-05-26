@@ -19,7 +19,8 @@ export default tseslint.config(
           ignoreRestSiblings: true,
           args: 'after-used'
         }
-      ]
+      ],
+      'prettier/prettier': ['warn']
     }
   }
 );

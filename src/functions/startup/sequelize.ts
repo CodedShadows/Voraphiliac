@@ -5,12 +5,11 @@ const { database } = config;
 
 export const name = 'sequelize';
 export async function execute(client: CustomClient, _ready: boolean): Promise<void> {
-  const { environment } = process.env;
   // Login to Sequelize
   const sequelize = new Sequelize(database.database, database.username, database.password, {
     host: database.host,
     dialect: 'mysql',
-    logging: environment === 'development' ? (sql, ms) => client.logs.debug({ sql, ms }) : false,
+    logging: process.env.NODE_ENV === 'development' ? (sql, ms) => client.logs.debug({ sql, ms }) : false,
     benchmark: true,
     port: database.port
   });

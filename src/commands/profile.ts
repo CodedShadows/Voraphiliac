@@ -81,7 +81,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
   let subcommand = options.getSubcommand(true);
   let character = await client.models.characters.findOne({ where: { discordId: interaction.user.id, active: true } });
   if (subcommand !== 'new' && !interaction.deferred && !interaction.replied)
-    await interaction.deferReply({ ephemeral: !/(view|list)/.test(subcommand) });
+    await interaction.deferReply({ flags: !/(view|list)/.test(subcommand) ? ['Ephemeral'] : [] });
   const filter = (i: Interaction) => i.user.id === interaction.user.id;
 
   // Find details on specific character
@@ -105,7 +105,8 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
 
   switch (subcommand) {
     case 'new': {
-      return interaction.showModal(new_profile_1);
+      interaction.showModal(new_profile_1);
+      return;
     }
     case 'edit': {
       if (!character) {
@@ -430,7 +431,7 @@ export async function execute({ client, interaction, options }: CmdFileArgs): Pr
           }
           await url.reply({
             content: `${emojis.failure} | Please close this message and pay attention to the above one!`,
-            ephemeral: true
+            flags: ['Ephemeral']
           });
           await interaction.editReply({ content: `${emojis.warning} | Processing...`, components: [] });
           const image = url.fields.fields.first();

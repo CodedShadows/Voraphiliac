@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, Client, SlashCommandBuilder } from 'discor
 import { Logger } from 'pino';
 import { Sequelize } from 'sequelize';
 import { initModels } from '../models/init-models.js';
+import { statsData } from '../models/stats.js';
 
 export interface CustomClient<Ready extends boolean = boolean> extends Client {
   /** @desc Commands for the bot to handle */
@@ -63,3 +64,5 @@ export type CmdFileArgs = {
   interaction: ChatInputCommandInteraction;
   options: ChatInputCommandInteraction['options'];
 };
+
+export type StatsUpdateHolder = Partial<Record<keyof statsData, number>>;

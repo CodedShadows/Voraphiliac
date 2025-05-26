@@ -7,10 +7,19 @@ export async function execute(client: CustomClient<true>, interaction: Interacti
   // Avoid running commands before the bot is ready
   if (!client.ready && interaction.isCommand()) {
     interaction.reply({
-      content: 'The bot is still starting up. Please wait a few seconds and try again.',
-      ephemeral: true
+      content: 'The bot is still starting up. Please wait a few seconds and try again',
+      flags: ['Ephemeral']
     });
+    return;
+  } else if (!client.ready && interaction.isMessageComponent()) {
+    interaction.update({
+      content: 'The bot has restarted, please re-run your command',
+      embeds: [],
+      components: []
+    });
+    return;
   } else if (!client.ready) {
+    console.info('Received an interaction but the client was not ready');
     return;
   }
   // Get the interaction function

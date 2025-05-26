@@ -27,7 +27,7 @@ export async function execute(client: CustomClient<true>, interaction: MessageCo
     });
   }
   if (interaction.user.id != preyDiscord)
-    return interaction.followUp({ content: 'This is not your choice to make!', ephemeral: true });
+    return interaction.followUp({ content: 'This is not your choice to make!', flags: ['Ephemeral'] });
   // Try to find the pred in the server.
   const predMember = await interaction.guild.members.fetch(predDiscord).catch(() => null);
   if (predMember === null) {

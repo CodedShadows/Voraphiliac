@@ -72,6 +72,10 @@
       "failure": {
         "type": "string",
         "description": "Failure raw emoji string"
+      },
+      "nsfw": {
+        "type": "string",
+        "description": "NSFW raw emoji string"
       }
     },
     "required": ["success", "error", "failure"]

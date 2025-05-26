@@ -73,7 +73,7 @@ export class characters
   declare hasPrey_digestions: Sequelize.HasManyHasAssociationsMixin<digestions, digestionsId>;
   declare countPrey_digestions: Sequelize.HasManyCountAssociationsMixin;
   // characters hasOne images via characterId
-  declare images: images[];
+  declare images: images;
   declare getImages: Sequelize.HasOneGetAssociationMixin<images>;
   declare setImages: Sequelize.HasOneSetAssociationMixin<images, imagesId>;
   declare createImages: Sequelize.HasOneCreateAssociationMixin<images>;
@@ -102,7 +102,7 @@ export class characters
   declare hasMementos: Sequelize.HasManyHasAssociationsMixin<mementos, mementosId>;
   declare countMementos: Sequelize.HasManyCountAssociationsMixin;
   // characters hasOne stats via characterId
-  declare stats: stats[];
+  declare stats: stats;
   declare getStats: Sequelize.HasOneGetAssociationMixin<stats>;
   declare setStats: Sequelize.HasOneSetAssociationMixin<stats, statsId>;
   declare createStats: Sequelize.HasOneCreateAssociationMixin<stats>;

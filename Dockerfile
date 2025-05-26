@@ -1,4 +1,4 @@
-FROM node:20.19.1
+FROM node:20.19.2
 WORKDIR /usr/src/voraphiliac
 
 COPY package*.json ./

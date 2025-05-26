@@ -3,7 +3,7 @@
     "discord.js": "14.19.3",
     "mysql2": "3.14.1",
     "node-fetch": "3.3.2",
-    "pino": "9.6.0",
+    "pino": "9.7.0",
     "sequelize": "6.37.7",
     "typescript": "5.8.3"
   },

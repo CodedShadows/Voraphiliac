@@ -17,7 +17,7 @@
     "eslint-plugin-prettier": "5.2.6",
     "globals": "16.0.0",
     "prettier": "3.5.3",
-    "typescript-eslint": "8.31.1"
+    "typescript-eslint": "8.35.1"
   },
   "name": "voraphiliac",
   "description": "Vore bot that utilizes Discord's Interaction system for a unique experience",

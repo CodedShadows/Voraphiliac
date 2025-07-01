@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.26.0",
-    "@types/node": "22.15.3",
+    "@types/node": "22.16.0",
     "@types/node-fetch": "2.6.12",
     "@types/sequelize": "4.28.20",
     "eslint": "9.26.0",
